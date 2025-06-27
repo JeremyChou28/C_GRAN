@@ -4,11 +4,11 @@ import pandas as pd
 from tqdm import tqdm
 
 # 文件路径配置（请修改为你自己的路径）
-unique_csv = 'output/Seednode_and_Targetnode_unique_seednode.csv'
-not_unique_csv = 'output/Seednode_and_Targetnode_not_unique_seednodes.csv'
-source_folder = 'output/Seednode_and_Targetnode_Morgan_Similarity_score'  # 包含所有8579.0_27.0格式文件的文件夹
-output_folder_unique = 'output/Seednode_and_Targetnode_Morgan_Similarity_score_split_unique'
-output_folder_not_unique = 'output/Seednode_and_Targetnode_Morgan_Similarity_score_split_not_unique'
+unique_csv = 'tmp/Seednode_and_Targetnode_unique_seednode.csv'
+not_unique_csv = 'tmp/Seednode_and_Targetnode_not_unique_seednodes.csv'
+source_folder = 'tmp/Seednode_and_Targetnode_Morgan_Similarity_score'  # 包含所有8579.0_27.0格式文件的文件夹
+output_folder_unique = 'tmp/Seednode_and_Targetnode_Morgan_Similarity_score_split_unique'
+output_folder_not_unique = 'tmp/Seednode_and_Targetnode_Morgan_Similarity_score_split_not_unique'
 
 # 创建输出文件夹
 os.makedirs(output_folder_unique, exist_ok=True)
@@ -20,7 +20,7 @@ df_not_unique = pd.read_csv(not_unique_csv)
 
 # 构建命名集合（文件名：'Targetnode_Seednode.csv'）
 def build_filename_set(df):
-    return set(f"{row['Targetnode']}_{row['Seednode']}.csv" for _, row in df.iterrows())
+    return set(f"{int(row['Targetnode'])}_{int(row['Seednode'])}.csv" for _, row in df.iterrows())
 
 unique_files = build_filename_set(df_unique)
 not_unique_files = build_filename_set(df_not_unique)

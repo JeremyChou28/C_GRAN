@@ -2,10 +2,10 @@ import pandas as pd
 from tqdm import tqdm
 
 # 读取第一个CSV文件
-file1 = pd.read_csv('corr_pval_with_n_CD_sediment_pos_3SD_20240811-unfiltered.csv')
+file1 = pd.read_csv('tmp/corr_pval_with_n_CD_sediment_pos_3SD_20240811-unfiltered.csv')
 
 # 读取第二个CSV文件
-file2 = pd.read_csv('significant_Sediment_pos_3SD_20240828_different_correlations_with_n_true.csv')
+file2 = pd.read_csv('tmp/significant_Sediment_pos_3SD_20240828_different_correlations_with_n_true.csv')
 
 # 使用Substance 1和Substance 2作为索引合并两个数据框
 merged_df = pd.merge(file1, file2, on=['Substance 1', 'Substance 2'], how='left')
@@ -27,5 +27,5 @@ merged_df.drop(['Correlation 1', 'Correlation 2', 'P-Value 1', 'P-Value 2', 'Cor
 
 # 保存结果到新的CSV文件，只包含需要的四列，并添加进度条
 with tqdm(total=merged_df.shape[0]) as pbar:
-    merged_df[['Substance 1', 'Substance 2', 'Correlation', 'P-Value']].to_csv('corr_pval_final_CD_sediment_pos_3SD_20240828_miniCor.csv', index=False)
+    merged_df[['Substance 1', 'Substance 2', 'Correlation', 'P-Value']].to_csv('tmp/corr_pval_final_CD_sediment_pos_3SD_20240828_miniCor.csv', index=False)
     pbar.update(merged_df.shape[0])

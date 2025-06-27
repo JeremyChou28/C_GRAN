@@ -3,8 +3,8 @@ import pandas as pd
 from tqdm import tqdm
 
 # 输入与输出文件夹路径（请根据实际路径修改）
-input_folder = 'output/Seednode_and_Targetnode_Morgan_Similarity_score_split_unique'       # 原始csv文件所在文件夹
-output_folder = 'output/Seednode_and_Targetnode_Morgan_Similarity_score_split_unique_Top10' # 输出文件夹
+input_folder = 'tmp/Seednode_and_Targetnode_Morgan_Similarity_score_split_unique'       # 原始csv文件所在文件夹
+output_folder = 'tmp/Seednode_and_Targetnode_Morgan_Similarity_score_split_unique_Top10' # 输出文件夹
 
 # 创建输出文件夹
 os.makedirs(output_folder, exist_ok=True)

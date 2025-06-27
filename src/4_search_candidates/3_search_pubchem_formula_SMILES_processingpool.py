@@ -1,40 +1,63 @@
 import os
 import re
+import gzip
 import pandas as pd
 from tqdm import tqdm  # 进度条
 from multiprocessing import Pool
 
 # 现有 CSV 结果文件所在文件夹
-csv_input_folder = "output/search_pubchem_mw_result"
+csv_input_folder = "tmp/search_pubchem_mw_result"
 # TTL 文件夹路径（存储 SMILES 和 Formula 信息）
-smiles_folder_path = "input/pubchem_2025_0218/canSMILES"
-formula_folder_path = "input/pubchem_2025_0218/formula"
-# **修正正则表达式，严格匹配 Canonical_SMILES 和 Molecular_Formula**
-cid_smiles_pattern = re.compile(r"descriptor:CID(\d+)_Canonical_SMILES")
-cid_formula_pattern = re.compile(r"descriptor:CID(\d+)_Molecular_Formula")
-data_pattern = re.compile(r'sio:SIO_000300\s+"([^"]+)"')  # 提取双引号中的数据
+smiles_folder_path = "/home/zhoujianping/hjwrw/Emerging_Pollutant_Molecular_Networking/pubchem_database/download_data/smiles"
+formula_folder_path = "/home/zhoujianping/hjwrw/Emerging_Pollutant_Molecular_Networking/pubchem_database/download_data/formula"
 
-# **解析 TTL 文件，构建 CID -> SMILES / Formula 映射**
-def parse_ttl_files(folder_path, data_type="SMILES"):
-    database = {}
-    ttl_files = [f for f in os.listdir(folder_path) if f.endswith(".ttl")]
-    print(f"正在解析 {data_type} TTL 文件...")
-    for ttl_file in tqdm(ttl_files, desc=f"解析 {data_type}", unit="file"):
-        file_path = os.path.join(folder_path, ttl_file)
-        with open(file_path, "r", encoding="utf-8") as f:
-            for line in f:
-                # 根据 data_type 选择不同的正则匹配
-                cid_match = cid_smiles_pattern.search(line) if data_type == "SMILES" else cid_formula_pattern.search(line)
-                data_match = data_pattern.search(line)
-                if cid_match and data_match:
-                    cid = cid_match.group(1)  # 提取 CID
-                    value = data_match.group(1)  # 提取 SMILES 或 Formula
-                    database[cid] = value
-    return database
+def process_ttl_smiles(file_path):
+    data = []
+    with gzip.open(file_path, 'rt', encoding='utf-8') as f:
+        for line in f:
+            if line.startswith('@') or not line.strip():
+                continue
+            parts = line.strip().split()
+            cid = parts[0].split(':')[-1].split('_')[0]
+            smiles = eval(parts[2])
+            data.append((cid, smiles))
+    return data
 
-# **解析 SMILES 和 Formula 数据**
-smiles_database = parse_ttl_files(smiles_folder_path, "SMILES")
-formula_database = parse_ttl_files(formula_folder_path, "Formula")
+def process_ttl_formula(file_path):
+    data=[]
+    with gzip.open(file_path, 'rt', encoding='utf-8') as f:
+        for line in f:
+            if line.startswith('@') or not line.strip():
+                continue
+            parts = line.strip().split()
+            cid=parts[0].split(':')[-1].split('_')[0]
+            formula=eval(parts[2])
+            data.append((cid, formula))
+    return data
+
+# 用于并行处理多个文件
+def process_files_in_parallel(file_paths, process_function, num_processes=4):
+    with Pool(processes=num_processes) as pool:
+        results = list(tqdm(pool.imap(process_function, file_paths), total=len(file_paths), desc="Processing files", unit="file"))
+    return results
+
+
+smiles_files = [f for f in os.listdir(smiles_folder_path) if f.endswith('.ttl.gz')]
+smiles_file_paths = [os.path.join(smiles_folder_path, file_name) for file_name in smiles_files]
+print("Processing SMILES files in parallel...")
+smiles_results = process_files_in_parallel(smiles_file_paths, process_ttl_smiles)
+smiles_database = {}
+for result in smiles_results:
+    smiles_database.update(result)  
+
+formula_files = [f for f in os.listdir(formula_folder_path) if f.endswith('.ttl.gz')]
+formula_file_paths = [os.path.join(formula_folder_path, file_name) for file_name in formula_files]
+print("Processing Formula files in parallel...")
+formula_results = process_files_in_parallel(formula_file_paths, process_ttl_formula)
+formula_database = {}
+for result in formula_results:
+    formula_database.update(result)  
+
 
 # **处理单行数据**
 def process_row(row):
@@ -46,7 +69,7 @@ def process_row(row):
     return row
 
 # **处理所有 CSV 文件**
-output_folder = "output/search_pubchem_mw_result_row_level"
+output_folder = "tmp/search_pubchem_mw_result_row_level"
 os.makedirs(output_folder, exist_ok=True)
 csv_files = [f for f in os.listdir(csv_input_folder) if f.endswith(".csv")]
 

@@ -3,9 +3,9 @@ import numpy as np
 from tqdm import tqdm
 
 # 读取第一个CSV文件
-df1 = pd.read_csv('corr_pval_with_n_CD_sediment_pos_3SD_20240811-unfiltered.csv')
+df1 = pd.read_csv('tmp/corr_pval_with_n_CD_sediment_pos_3SD_20240811-unfiltered.csv')
 # 读取第二个CSV文件
-df2 = pd.read_csv('corr_pval_with_n_CD_sediment_pos_3SD_20240811-filtered.csv')
+df2 = pd.read_csv('tmp/corr_pval_with_n_CD_sediment_pos_3SD_20240811-filtered.csv')
 
 # 检查两个DataFrame是否具有相同的结构
 if df1.shape != df2.shape:
@@ -48,6 +48,6 @@ progress_bar.close()
 
 # 将不同的相关系数及P值写入CSV文件
 different_correlations_df = pd.DataFrame(different_correlations, columns=['Substance 1', 'Substance 2', 'Correlation 1', 'P-Value 1', 'n1', 'Correlation 2', 'P-Value 2', 'n2'])
-different_correlations_df.to_csv('Sediment_pos_3SD_20240812_different_correlations_with_n.csv', index=False)
+different_correlations_df.to_csv('tmp/Sediment_pos_3SD_20240812_different_correlations_with_n.csv', index=False)
 
 print("已将不同的相关系数P值及n值写入到文件中。")

@@ -4,8 +4,8 @@ import re
 from tqdm import tqdm
 
 # 输入文件夹路径和输出文件夹路径
-input_folder = 'output/search_pubchem_mw_result_row_level'     # 替换为你的原始CSV文件夹路径
-output_folder = 'output/search_pubchem_mw_result_row_level_filtered_formula'
+input_folder = 'tmp/candidates'     # 替换为你的原始CSV文件夹路径
+output_folder = 'tmp/candidates_filtered_formula'
 
 # 创建输出目录（如不存在）
 os.makedirs(output_folder, exist_ok=True)
@@ -44,3 +44,4 @@ with tqdm(total=len(csv_files), desc="Filtering formulas") as pbar:
         df_filtered.to_csv(output_path, index=False)
 
         pbar.update(1)
+

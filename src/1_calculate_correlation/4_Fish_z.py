@@ -15,7 +15,7 @@ def z_test(z1, z2, n1, n2):
     return p_value
 
 # 读取CSV文件
-df = pd.read_csv("Sediment_pos_3SD_20240812_different_correlations_with_n.csv")
+df = pd.read_csv("tmp/Sediment_pos_3SD_20240812_different_correlations_with_n.csv")
 
 # 初始化进度条
 total_iterations = len(df)
@@ -33,4 +33,4 @@ with tqdm(total=total_iterations, desc="Processing Rows") as pbar:
 significant_rows = df[(df['p_value'] < 0.05) | df['p_value'].isna()]
 
 # 输出到CSV文件
-significant_rows.to_csv("significant_Sediment_pos_3SD_20240828_different_correlations_with_n_true.csv", index=False)
+significant_rows.to_csv("tmp/significant_Sediment_pos_3SD_20240828_different_correlations_with_n_true.csv", index=False)

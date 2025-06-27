@@ -3,20 +3,20 @@ import pandas as pd
 from tqdm import tqdm
 
 # 路径设置（请修改为你实际的路径）
-file_a_path = 'output/Seednode_and_Targetnode_not_unique_seednodes.csv'  # 文件A路径
-folder_b = 'output/Seednode_and_Targetnode_Morgan_Similarity_score_split_not_unique' # 文件夹B路径
-output_folder = 'output/Seednode_and_Targetnode_Morgan_Similarity_score_split_not_unique_Top10' # 输出文件夹
+file_a_path = 'tmp/Seednode_and_Targetnode_not_unique_seednodes.csv'  # 文件A路径
+folder_b = 'tmp/Seednode_and_Targetnode_Morgan_Similarity_score_split_not_unique' # 文件夹B路径
+output_folder = 'tmp/Seednode_and_Targetnode_Morgan_Similarity_score_split_not_unique_Top10' # 输出文件夹
 
 os.makedirs(output_folder, exist_ok=True)
 
 # 读取文件A，建立 (Targetnode, Seednode) → Correlation 映射
 df_corr = pd.read_csv(file_a_path)
-df_corr['Seednode'] = df_corr['Seednode'].astype(int)
-df_corr['Targetnode'] = df_corr['Targetnode'].astype(str)  # 保留一位小数
+# df_corr['Seednode'] = df_corr['Seednode'].astype(int)
+# df_corr['Targetnode'] = df_corr['Targetnode'].astype(str)  # 保留一位小数
 
 # 构建字典索引
 correlation_dict = {
-    (row['Targetnode'], row['Seednode']): row['Correlation']
+    (int(row['Targetnode']), int(row['Seednode'])): row['Correlation']
     for _, row in df_corr.iterrows()
 }
 
@@ -32,8 +32,8 @@ with tqdm(total=len(csv_files), desc="Processing files") as pbar:
             # 解析文件名：Targetnode_Seednode.csv
             base_name = filename[:-4]  # 去掉 .csv
             target_str, seed_str = base_name.split('_')
-            targetnode = f"{float(target_str):.1f}"
-            seednode = int(float(seed_str))
+            targetnode = eval(target_str)
+            seednode = eval(seed_str)
 
             # 读取文件并添加 Correlation 加权列
             file_path = os.path.join(folder_b, filename)

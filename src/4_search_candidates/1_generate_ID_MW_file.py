@@ -2,8 +2,8 @@ import pandas as pd
 from tqdm import tqdm
 
 # 输入输出路径
-input_file = 'input/source_target_cor_edit.csv'   # 替换为实际文件路径
-output_file = 'output/unique_ids_with_mw.csv'
+input_file = 'test_files/source_target_cor_edit.csv'   # 替换为实际文件路径
+output_file = 'tmp/unique_ID_MW.csv'
 
 # 读取数据
 df = pd.read_csv(input_file)

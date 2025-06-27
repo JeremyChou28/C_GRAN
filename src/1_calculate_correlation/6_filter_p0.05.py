@@ -1,8 +1,8 @@
 import pandas as pd
 from tqdm import tqdm
 
-# 读取CSV文件
-df = pd.read_csv('corr_pval_final_CD_sediment_pos_3SD_20240828_miniCor.csv')
+# 读取CSV文件 
+df = pd.read_csv('tmp/corr_pval_final_CD_sediment_pos_3SD_20240828_miniCor.csv')
 
 # 筛选条件：P-Value小于0.05 
 filtered_rows = []
@@ -16,6 +16,6 @@ with tqdm(total=total_rows) as pbar:
 filtered_df = pd.DataFrame(filtered_rows)
 
 # 将筛选后的结果保存到新的CSV文件中
-filtered_df.to_csv('corr_pval_final_CD_sediment_pos_3SD_20240828_miniCor_p0.05.csv', index=False)
+filtered_df.to_csv('tmp/corr_pval_final_CD_sediment_pos_3SD_20240828_miniCor_p0.05.csv', index=False)
 
 

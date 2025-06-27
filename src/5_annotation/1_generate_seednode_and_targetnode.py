@@ -2,9 +2,9 @@ import pandas as pd
 from tqdm import tqdm
 
 # 输入路径
-file_a_path = 'input/source_target_cor_edit.csv'  # 替换为实际路径
-file_b_path = 'input/14seednode.csv'              # 替换为实际路径
-output_path = 'output/Seednode_and_Targetnode.csv'
+file_a_path = 'test_files/source_target_cor_edit.csv'  # 替换为实际路径
+file_b_path = 'test_files/14seednode.csv'              # 替换为实际路径
+output_path = 'tmp/Seednode_and_Targetnode.csv'
 
 # 读取文件
 df_a = pd.read_csv(file_a_path)
@@ -29,13 +29,13 @@ for _, row in tqdm(df_a.iterrows(), total=len(df_a), desc="Filtering connected n
     if source_in_seed and not target_in_seed:
         results.append({
             'Seednode': source,
-            'Targetnode': f"{target:.1f}",
+            'Targetnode': target,
             'Correlation': corr
         })
     elif target_in_seed and not source_in_seed:
         results.append({
             'Seednode': target,
-            'Targetnode': f"{source:.1f}",
+            'Targetnode': source,
             'Correlation': corr
         })
 

@@ -2,9 +2,9 @@ import pandas as pd
 from tqdm import tqdm
 
 # 输入输出路径
-input_path = 'output/Seednode_and_Targetnode.csv'  # 替换为你的实际文件路径
-output_unique = 'output/Seednode_and_Targetnode_unique_seednode.csv'
-output_repeated = 'output/Seednode_and_Targetnode_not_unique_seednodes.csv'
+input_path = 'tmp/Seednode_and_Targetnode.csv'  # 替换为你的实际文件路径
+output_unique = 'tmp/Seednode_and_Targetnode_unique_seednode.csv'
+output_repeated = 'tmp/Seednode_and_Targetnode_not_unique_seednodes.csv'
 
 # 读取CSV
 df = pd.read_csv(input_path)

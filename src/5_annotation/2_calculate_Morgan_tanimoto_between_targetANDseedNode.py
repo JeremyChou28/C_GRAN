@@ -3,12 +3,15 @@ import pandas as pd
 from rdkit import Chem
 from rdkit.Chem import rdMolDescriptors, DataStructs
 from tqdm import tqdm
+import warnings
+# 忽略警告信息
+warnings.filterwarnings("ignore")
 
 # 文件路径
-seednode_file = "14seednode.csv"
-edges_file = "Seednode_and_Targetnode.csv"
-targetnode_dir = "search_pubchem_mw_result_row_level_filtered_formula"  # 目标物质的 CSV 文件存放目录
-output_dir = "Seednode_and_Targetnode_Morgan_Similarity_score"  # 结果存放目录
+seednode_file = "test_files/14seednode.csv"
+edges_file = "tmp/Seednode_and_Targetnode.csv"
+targetnode_dir = "../4_search_candidates/candidates"  # 目标物质的 CSV 文件存放目录
+output_dir = "tmp/Seednode_and_Targetnode_Morgan_Similarity_score"  # 结果存放目录
 os.makedirs(output_dir, exist_ok=True)
 
 # 读取 Seednode 的 SMILES 信息
@@ -30,7 +33,7 @@ def tanimoto_similarity(smiles1, smiles2):
 
 # 计算并保存相似性分数
 for _, row in tqdm(df_edges.iterrows(), total=len(df_edges), desc="Processing Edges"):
-    target_id, seed_id = row["Targetnode"], row["Seednode"]
+    target_id, seed_id = int(row["Targetnode"]), int(row["Seednode"])
     
     # 获取 Seednode 的 SMILES
     seed_smiles = seednode_smiles_dict.get(seed_id)
@@ -41,7 +44,6 @@ for _, row in tqdm(df_edges.iterrows(), total=len(df_edges), desc="Processing Ed
     target_file = os.path.join(targetnode_dir, f"{target_id}.csv")
     if not os.path.exists(target_file):
         continue  # 如果没有该 Targetnode 文件，跳过
-    
     df_target = pd.read_csv(target_file)
     if "SMILES" not in df_target.columns:
         continue  # 确保文件中包含 SMILES 列

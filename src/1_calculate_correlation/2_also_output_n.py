@@ -3,12 +3,13 @@ import numpy as np
 import pandas as pd
 from tqdm import tqdm
 
+
 def load_pickle(pkl_path):
     f = open(pkl_path, 'rb')
     pkl = pickle.load(f)
     return pkl['corr'], pkl['p_value'], pkl['non_zero_count']
 
-filtered_pkl_path = "corr_pval_with_n_CD_sediment_pos_3SD_20240811-filtered.pickle"
+filtered_pkl_path = "tmp/corr_pval_with_n_CD_sediment_pos_3SD_20240811-unfiltered.pickle"
 f_corr_df, f_pv_df , f_n_df = load_pickle(filtered_pkl_path)
 
 # 获取物质名称
@@ -37,4 +38,4 @@ with tqdm(total=total_iterations, desc="Progress") as pbar:
 combined_df = pd.DataFrame(combined_data, columns=['Substance 1', 'Substance 2', 'Correlation', 'P-Value', 'n'])
 
 # 将数据保存到CSV文件中
-combined_df.to_csv('corr_pval_with_n_CD_sediment_pos_3SD_20240811-filtered.csv', index=False)
+combined_df.to_csv('tmp/corr_pval_with_n_CD_sediment_pos_3SD_20240811-unfiltered.csv', index=False)

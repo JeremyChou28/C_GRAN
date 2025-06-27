@@ -2,7 +2,7 @@ import pandas as pd
 from tqdm import tqdm
 
 # 读取第一个CSV文件
-file1 = pd.read_csv('corr_pval_final_CD_sediment_pos_3SD_20240828_miniCor_p0.05.csv')
+file1 = pd.read_csv('../1_calculate_correlation/corr_pval_final_CD_sediment_pos_3SD_20240828_true_p0.05.csv')
 
 # 读取第二个CSV文件
 file2 = pd.read_csv('14seednode.csv')

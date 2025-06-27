@@ -1,31 +1,38 @@
-import numpy as np
 import os
-import pandas as pd
+import pickle
 import argparse
+import numpy as np
+import pandas as pd
 from tqdm import tqdm
 import multiprocessing
-from multiprocessing import shared_memory, Process, Pool
 from functools import partial
 from scipy.stats import pearsonr
-import pickle
+from multiprocessing import shared_memory, Process, Pool
 
 def parse_args():
     parser = argparse.ArgumentParser()
     parser.add_argument(
-        "input_data",
+        "--input-data",
+        default="test.txt",
+        type=str,
+        required=True,
         help="input data path, TXT file",
-        type=str
     )
+    parser.add_argument(
+        "--compounds-num",
+        type=int,
+        required=True,
+        help="number of compounds")
+    parser.add_argument(
+        "--samples-num",
+        type=int,
+        required=True,
+        help="number of samples")
     parser.add_argument(
         "--filter-expt",
         default=False,
+        action="store_true",
         help="filter out exception values",
-        action="store_true",
-    )
-    parser.add_argument(
-        "--need-transpose",
-        default=False,
-        action="store_true",
     )
     parser.add_argument(
         "--n-jobs",
@@ -35,7 +42,7 @@ def parse_args():
     )
     parser.add_argument(
         "--run-name",
-        default="",
+        default="test",
         type=str,
         help="run name for output pickle filename",
     )
@@ -64,11 +71,11 @@ if __name__ == "__main__":
     args = parse_args()
 
     print(f'Loading data {args.input_data}...')
-    df = pd.read_csv(args.input_data, sep='\t')  
-    names = df.columns
-    if args.need_transpose:
-        df = df.T
-    assert df.shape[1] == 60, "the number of columns should be 60, add or delete the --need-transpose flag"  #需要由用户输入样品数量
+    df = pd.read_csv(args.input_data, sep='\t', index_col=0)  
+    names = df.index
+    
+    assert df.shape[0] == args.compounds_num and df.shape[1] == args.samples_num, "The shape read from the file should be (number of substances, number of samples)" 
+    
     print(f'Data loaded. shape: {df.shape}')
 
     if args.filter_expt:
@@ -77,7 +84,7 @@ if __name__ == "__main__":
             filter_out_exceptions(row)
     else:
         print("not filter expt values")
-    out_file_name = f"corr_pval_{args.run_name}.pickle"
+    out_file_name = f"tmp/corr_pval_{args.run_name}.pickle"
     print(f"out_file_name: {out_file_name}")
 
     arr = df.to_numpy()
