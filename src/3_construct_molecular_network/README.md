@@ -1,4 +1,4 @@
-3. Construct molecular network
+# Construct molecular network
 
 you could run the example as follows:
 

@@ -153,7 +153,51 @@ def filter_candidates_by_formula(input_folder, output_folder):
             df_filtered.to_csv(output_path, index=False)
 
             pbar.update(1)
-    
+
+def filter_candidates_by_smiles(input_folder, output_folder):
+    if not os.path.exists(output_folder):
+        os.makedirs(output_folder)
+
+    # 创建输出目录（如不存在）
+    os.makedirs(output_folder, exist_ok=True)
+
+    # 获取所有csv文件名
+    csv_files = [f for f in os.listdir(input_folder) if f.endswith('.csv')]
+
+    # 初始化进度条
+    with tqdm(total=len(csv_files), desc="Filtering candidates smiles") as pbar:
+        for file in csv_files:
+            file_path = os.path.join(input_folder, file)
+            try:
+                df = pd.read_csv(file_path)
+                if 'SMILES' not in df.columns:
+                    print(f"⚠️ Skipped {file}: No 'SMILES' column found.")
+                    pbar.update(1)
+                    continue
+
+                # 保留不含 '.', '+', '-' 的行
+                df_filtered = df[~df['SMILES'].fillna('').astype(str).str.contains(r"[.\+\-]")]
+
+                # 保存过滤后的数据
+                output_path = os.path.join(output_folder, file)
+                df_filtered.to_csv(output_path, index=False)
+
+            except Exception as e:
+                print(f"❌ Error processing {file}: {e}")
+
+            pbar.update(1)
+
+
+def remove_empty_csv_files(folder_path):
+    cnt=0
+    for filename in os.listdir(folder_path):
+        if filename.endswith('.csv'):
+            file_path = os.path.join(folder_path, filename)
+            df = pd.read_csv(file_path)
+            if df.empty:
+                cnt+=1
+                os.remove(file_path)
+    print(f"Total empty files removed: {cnt}")
 
 if __name__ == "__main__":
     start_time=time.time()
@@ -178,7 +222,12 @@ if __name__ == "__main__":
         os.makedirs(tmp_candidates_folder)
     search_candidates_by_mw(unique_ids_df, pubchem_dict, tmp_candidates_folder)
 
-    # 依据分子式进行过滤，得到最终的candidates
-    filter_candidates_by_formula(tmp_candidates_folder, args.candidates_folder)
+    # 依据分子式进行元素过滤，得到candidates
+    tmp_filtered_candidates_by_formula_folder= tmp_result_path + "candidates_filtered_by_formula"
+    filter_candidates_by_formula(tmp_candidates_folder, tmp_filtered_candidates_by_formula_folder)
     
+    # 依据SMILES进行过滤，得到candidates
+    filter_candidates_by_smiles(tmp_filtered_candidates_by_formula_folder, args.candidates_folder)
+    
+    remove_empty_csv_files(args.candidates_folder)
     print("Spend time: ", time.time() - start_time)

@@ -1,4 +1,4 @@
-4. Search candidates
+# Search candidates
 
 you could run the example as follows:
 

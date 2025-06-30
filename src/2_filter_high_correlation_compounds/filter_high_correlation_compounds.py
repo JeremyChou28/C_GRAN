@@ -8,7 +8,7 @@ def parse_args():
     parser = argparse.ArgumentParser(description="Filter high correlation compounds and generate high correlated nodes.")
     parser.add_argument(
         "--seednode_file",
-        default="14seednode.csv",
+        default="seednode.csv",
         type=str,
         required=True,
         help="input seednode file",
@@ -26,7 +26,12 @@ def filter_according_to_substance(correlation_df, seednode_df, output_filename):
     substances = seednode_df['ID'].tolist()
 
     # 筛选Substance 1或者Substance 2在ID中的行
-    filtered_df = correlation_df[(correlation_df['Substance 1'].isin(substances)) | (correlation_df['Substance 2'].isin(substances))]
+    filtered_df = correlation_df[(correlation_df['Substance 1'].isin(substances)) | (correlation_df['Substance 2'].isin(substances))].copy()
+    
+    # 强制转换为整数类型
+    filtered_df['Substance 1'] = filtered_df['Substance 1'].astype('int64')
+    filtered_df['Substance 2'] = filtered_df['Substance 2'].astype('int64')
+
 
     # 保存筛选后的结果到新的CSV文件，添加进度条
     with tqdm(total=filtered_df.shape[0]) as pbar:
@@ -64,7 +69,7 @@ if __name__ == "__main__":
     seednode_df = pd.read_csv(args.seednode_file)
     
     # 过滤高相关性化合物
-    filter_filename=tmp_result_path+'corr_pval_final_CD_sediment_pos_3SD_20240828_miniCor_p0.05_connectwith_14seednode.csv'
+    filter_filename=tmp_result_path+'corr_pval_final_CD_sediment_pos_3SD_20240828_miniCor_p0.05_connectwith_seednode.csv'
     filtered_df=filter_according_to_substance(correlation_df, seednode_df,filter_filename)
     
     # 生成高相关性节点

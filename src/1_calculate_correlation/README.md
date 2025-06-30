@@ -1,4 +1,4 @@
-1. Calculate correlation
+# Calculate correlation
 
 you could run the example as follows:
 ```sh

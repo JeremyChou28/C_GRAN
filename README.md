@@ -32,34 +32,57 @@ pip install -r requirements.txt
 ### Quick start <a name="quick-start"></a>
 
 1. Calculate correlation
+
 ```sh
 cd src/1_calculate_correlation
-python calculate_correlation.py
+
+python calculate_correlation.py --input-data test_files/test.txt --compounds-num 14 --samples-num 98
 ```
 
 2. Filter compounds with high correlation values
+
 ```sh
 cd src/2_filter_high_correlation_compounds
-python filter_high_correlation_compounds.py
+
+python filter_high_correlation_compounds.py --correlation_file ../1_calculate_correlation/corr_pval_final_CD_sediment_pos_3SD_20240828_true_p0.05.csv --seednode_file test_files/seednode.csv
 ```
 
 3. Construct molecular network
+
 ```sh
 cd src/3_construct_molecular_network
-python construct_molecular_network.py
+
+python construct_molecular_network.py --source_target_file test_files/source_target.csv --correlation_file ../1_calculate_correlation/corr_pval_final_CD_sediment_pos_3SD_20240828_true_p0.05.csv
 ```
 
 
 4. Search candidates
+
+if you need to prepare pubchem database from scratch, you should run this script first:
 ```sh
 cd src/4_search_candidates
-python search_candidates.py
+
+python process_pubchem_database.py
+```
+or you could download our prepared pubchem database from the [link](baiduyun).
+
+then, run this script for searching candidates:
+```sh
+python search_candidates.py --molecular_network_file test_files/source_target_cor_edit.csv --pubchem_database_path ./pubchem_database.pk --candidates_folder ./candidates/
 ```
 
 5. Annotation
+
+Fist, you should prepare the [CFMID](https://hub.docker.com/r/wishartlab/cfmid) environment, and then you could run the example as follows:
+
 ```sh
 cd src/5_annotation
-python annotation.py
+
+python preprocess.py --molecular_network_file ./test_files/source_target_cor_edit.csv --seednode_file ./test_files/seednode.csv --candidates_folder ../4_search_candidates/candidates
+
+python cfmid_prediction.py --num_containers 10 --spectrum_file ./test_files/compounds_spectrum.mgf
+
+python postprocess.py --seednode_file ./test_files/seednode.csv
 ```
 
 <!-- <p align="right">(<a href="#readme-top">back to top</a>)</p> -->

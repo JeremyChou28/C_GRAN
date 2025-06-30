@@ -161,9 +161,9 @@ def compare_filtered_unfiltered(df1,df2,output_filename):
         if pd.isnull(corr1) and pd.isnull(corr2):
             continue  # 如果两个相关系数都是缺失值，则跳过比较
         elif pd.isnull(corr1) or pd.isnull(corr2):
-            different_correlations.append([row['Substance 1'], row['Substance 2'], corr1, pval1, n1, corr2, pval2, n2])
+            different_correlations.append([int(row['Substance 1']), int(row['Substance 2']), corr1, pval1, n1, corr2, pval2, n2])
         elif round(corr1, 9) != round(corr2, 9):
-            different_correlations.append([row['Substance 1'], row['Substance 2'], corr1, pval1, n1, corr2, pval2, n2])
+            different_correlations.append([int(row['Substance 1']), int(row['Substance 2']), corr1, pval1, n1, corr2, pval2, n2])
         
         counter += 1
         if counter % 100 == 0:
@@ -217,7 +217,7 @@ def replace_with_miniCor(unfiltered_df, significant_df, output_filename):
 
     # 判断较小的Correlation值，并获取对应的P-Value
     # 创建布尔掩码：True 表示 Correlation 1 更小，False 表示 Correlation 2 更小或相等
-    mask = merged_df['Correlation 1'] < merged_df['Correlation 2']
+    mask = merged_df['Correlation 1'].abs() < merged_df['Correlation 2'].abs()
 
     # 创建新的列 Correlation_min 和对应的 P-Value_min
     merged_df['Correlation_min'] = merged_df['Correlation 1'].where(mask, merged_df['Correlation 2'])
@@ -238,21 +238,8 @@ def replace_with_miniCor(unfiltered_df, significant_df, output_filename):
     return merged_df
 
 def filter_p(df, output_filename):
-    # 筛选条件：P-Value小于0.05 
-    filtered_rows = []
-    total_rows = len(df)
-    with tqdm(total=total_rows) as pbar:
-        for index, row in df.iterrows():
-            if (row['P-Value'] < 0.05):
-                filtered_rows.append(row)
-            pbar.update(1)
-
-    filtered_df = pd.DataFrame(filtered_rows)
-
-    # 将筛选后的结果保存到新的CSV文件中
+    filtered_df = df[df['P-Value'] < 0.05]
     filtered_df.to_csv(output_filename, index=False)
-
-
 
 
 if __name__ == "__main__":
