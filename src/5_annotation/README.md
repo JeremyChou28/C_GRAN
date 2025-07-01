@@ -1,6 +1,6 @@
 # Annotation
 
-Fist, you should prepare the [CFMID](https://hub.docker.com/r/wishartlab/cfmid) environment, and then you could run the example step by step as follows:
+First, you should prepare the [CFMID](https://hub.docker.com/r/wishartlab/cfmid) environment, and then you could run the example step by step as follows:
 
 ```sh
 cd src/5_annotation

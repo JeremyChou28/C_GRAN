@@ -64,7 +64,7 @@ cd src/4_search_candidates
 
 python process_pubchem_database.py
 ```
-or you could download our prepared pubchem database from the [link](baiduyun).
+or you could download our prepared pubchem database from the [google drive](https://drive.google.com/file/d/17Qmie31AWyOmBy-D1hfhvRoRn2VmdQuC/view?usp=drive_link) or [baiduyun](https://pan.baidu.com/s/1SlKP6dTYZhWI0A5Q3_7thw?pwd=e9dq).
 
 then, run this script for searching candidates:
 ```sh
@@ -73,7 +73,7 @@ python search_candidates.py --molecular_network_file test_files/source_target_co
 
 5. Annotation
 
-Fist, you should prepare the [CFMID](https://hub.docker.com/r/wishartlab/cfmid) environment, and then you could run the example as follows:
+First, you should prepare the [CFMID](https://hub.docker.com/r/wishartlab/cfmid) environment, and then you could run the example step by step as follows:
 
 ```sh
 cd src/5_annotation
@@ -83,6 +83,14 @@ python preprocess.py --molecular_network_file ./test_files/source_target_cor_edi
 python cfmid_prediction.py --num_containers 10 --spectrum_file ./test_files/compounds_spectrum.mgf
 
 python postprocess.py --seednode_file ./test_files/seednode.csv
+```
+
+or you run the iterative annotation as follows:
+
+```sh
+cd src/5_annotation
+
+python run_iterative_annotation.py --molecular_network_file ./test_files/source_target_cor_edit.csv --seednode_file ./test_files/seednode.csv --candidates_folder ../4_search_candidates/candidates --num_containers 10 --spectrum_file ./test_files/compounds_spectrum.mgf
 ```
 
 <!-- <p align="right">(<a href="#readme-top">back to top</a>)</p> -->
