@@ -12,13 +12,29 @@ from matchms.similarity import ModifiedCosine
 from functools import partial
 
 def parse_args():
-    parser = argparse.ArgumentParser(description="Search candidates.")
+    parser = argparse.ArgumentParser(description="CFM prediction.")
+    # offline parameters
     parser.add_argument(
         "--num_containers",
         default=10,
         type=int,
         required=True,
         help="the number of Docker containers to run in parallel",
+    )
+    parser.add_argument(
+        "--tolerance",
+        default=0.1,
+        type=float,
+        required=True,
+        help="the tolerance for the modified cosine similarity calculation",
+    )
+    parser.add_argument(
+        "--energy_level",
+        default=0,
+        type=int,
+        required=True,
+        choices=[0, 1, 2],
+        help="the energy level of the spectrum data predicted by CFM-ID, 0 represents low, 1 represents medium, and 2 represents high energy level",
     )
     parser.add_argument(
         "--spectrum_file",
@@ -58,7 +74,7 @@ class CFMDockerController:
         print(f"🛑 容器 {self.container_name} 已停止并删除")
 
 
-def calculate_modified_cosine_similarity(prediction_ms, prediction_peaks, target_node_id, all_target_spectra, tolerance=0.1):
+def calculate_modified_cosine_similarity(prediction_ms, prediction_peaks, target_node_id, all_target_spectra, tolerance):
     target_node_ms = all_target_spectra.get(target_node_id, None)['params']['PEPMASS']
     target_node_peaks = all_target_spectra.get(target_node_id, None)['peaks']
     
@@ -157,15 +173,18 @@ def process_smiles(args):
     
     try:
         controller.predict(smile, output_file)
-        prediction_ms, prediction_peaks = parse_prediction_spectrum(output_file, energy_level=0)
+        prediction_ms, prediction_peaks = parse_prediction_spectrum(output_file, args.energy_level)
         
         if prediction_ms is None or not prediction_peaks:
             return idx, np.nan
         
         score = calculate_modified_cosine_similarity(
-            prediction_ms, prediction_peaks, target_node_id, all_target_spectra
+            prediction_ms, prediction_peaks, target_node_id, all_target_spectra, args.tolerance
         )
-        return idx, score
+        if score < args.threshold_modified_cosine_similarity:
+            return idx, np.nan
+        else:
+            return idx, score
     except Exception as e:
         print(f"❌ 错误处理 {smile}: {e}")
         return idx, np.nan

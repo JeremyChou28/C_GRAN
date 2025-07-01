@@ -24,54 +24,34 @@ def parse_args():
         help="the candidates folder to save the search results",
     )
     parser.add_argument(
-        "--num_containers",
-        default=10,
-        type=int,
-        required=True,
-        help="the number of Docker containers to run in parallel",
-    )
-    parser.add_argument(
-        "--tolerance",
-        default=0.1,
-        type=float,
-        required=True,
-        help="the tolerance for the modified cosine similarity calculation",
-    )
-    parser.add_argument(
-        "--energy_level",
-        default=0,
-        type=int,
-        required=True,
-        choices=[0, 1, 2],
-        help="the energy level of the spectrum data predicted by CFM-ID, 0 represents low, 1 represents medium, and 2 represents high energy level",
-    )
-    parser.add_argument(
-        "--threshold_modified_cosine_similarity",
+        "--threshold_tanimoto_similarity",
         default=0.5,
         type=float,
         required=True,
-        help="the threshold for modified cosine similarity to filter the results",
-    )
-    parser.add_argument(
-        "--spectrum_file",
-        default="./test_files/compounds_spectrum.mgf",
-        type=str,
-        required=True,
-        help="the mgf file containing target node spectra",
+        help="the threshold for tanimoto similarity to filter the results",
     )
     return parser.parse_args()
 
 
-def merge_cfmid_results(tmp_folder, output_file):
+def merge_naive_results(tmp_folder, output_file):
     all_files = [f for f in os.listdir(tmp_folder) if f.endswith('.csv')]
     df_list = []
 
     for file in all_files:
         file_path = os.path.join(tmp_folder, file)
         df = pd.read_csv(file_path)
-        # 提取ID并添加为第一列
-        id_value = file.split('.')[0]  # 假设文件名格式为 ID.csv
-        df.insert(0, 'ID', id_value)  # 插入到第一列
+
+        # 提取 ID（文件名去掉 .csv）
+        id_value = os.path.splitext(file)[0]
+
+        # 统一字段：确保包含 weighted_score 列（若无则补 NaN）
+        if 'weighted_score' not in df.columns:
+            df['weighted_score'] = pd.NA  # 或 None
+
+        # 保留并重排你需要的列
+        df = df[['CID', 'MW', 'SMILES', 'Formula', 'score', 'weighted_score']]
+        df.insert(0, 'ID', id_value)  # 将 ID 插入第一列
+
         df_list.append(df)
 
     # 合并所有DataFrame
@@ -100,10 +80,9 @@ if __name__ == "__main__":
 
         # 依次运行三个脚本
         subprocess.run(["python", "preprocess.py", "--molecular_network_file", args.molecular_network_file, "--seednode_file", seednode_file, "--candidates_folder", args.candidates_folder], check=True)
-        subprocess.run(["python", "cfmid_prediction.py", "--num_containers", str(args.num_containers), "--tolerance", str(args.tolerance),"--energy_level", str(args.energy_level), "--spectrum_file", args.spectrum_file], check=True)
-        subprocess.run(["python", "postprocess.py","--seednode_file",seednode_file,"--threshold_modified_cosine_similarity",str(args.threshold_modified_cosine_similarity)], check=True)
+        subprocess.run(["python", "naive_prediction.py", "--molecular_network_file", args.molecular_network_file, "--seednode_file", seednode_file,"--threshold_tanimoto_similarity", str(args.threshold_tanimoto_similarity)], check=True)
 
-        seednode_file='tmp/seednode.csv'
+        seednode_file='tmp/naive_cycle_seednode.csv'
         # 读取 seednode 文件，检查 ID 集合
         try:
             seednode_df = pd.read_csv(seednode_file)
@@ -120,4 +99,4 @@ if __name__ == "__main__":
         print("⚠️ 达到最大循环次数，仍未完成。")
 
     # 输出最终的注释结果
-    merge_cfmid_results(tmp_folder='tmp/cfmid_score_results', output_file='final_annotation_results.csv')
+    merge_naive_results(tmp_folder='tmp/naive_prediction_results', output_file='final_naive_annotation_results.csv')

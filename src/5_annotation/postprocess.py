@@ -14,6 +14,13 @@ def parse_args():
         required=True,
         help="the original seednode file containing ID and SMILES",
     )
+    parser.add_argument(
+        "--threshold_modified_cosine_similarity",
+        default=0.5,
+        type=float,
+        required=True,
+        help="the threshold for modified cosine similarity to filter the results",
+    )
     return parser.parse_args()
 
 def pick_final_annotation(cfmid_prediction_folder, output_file):
@@ -70,14 +77,14 @@ def pick_final_annotation(cfmid_prediction_folder, output_file):
         final_df.to_csv(output_file, index=False)
 
 
-def filter_annotation(annotation_file, output_file):
+def filter_annotation(annotation_file, output_file, threshold_modified_cosine_similarity):
     # 读取CSV文件
     df = pd.read_csv(annotation_file)
 
     # 初始化进度条
     with tqdm(total=2, desc="Filtering and selecting columns") as pbar:
         # Step 1: 筛选 CFM-ID_score > 0.7  #用户自定义阈值
-        df_filtered = df[df['CFM-ID_score'] > 0.7].copy()
+        df_filtered = df[df['CFM-ID_score'] > threshold_modified_cosine_similarity].copy()
         pbar.update(1)
 
         # Step 2: 只保留指定列
@@ -103,7 +110,7 @@ if __name__ == "__main__":
     pick_final_annotation(cfmid_prediction_folder, annotation_result_file)
 
     output_file = tmp_result_path+'annotation_results_filtered.csv'
-    filter_annotation(annotation_result_file, output_file)
+    filter_annotation(annotation_result_file, output_file, args.threshold_modified_cosine_similarity)
     
     # 生成下一轮的seednode file
     annotated_nodes_df = pd.read_csv(output_file)

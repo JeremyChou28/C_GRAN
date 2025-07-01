@@ -34,6 +34,12 @@ def parse_args():
         required=True,
         help="number of samples")
     parser.add_argument(
+        "--correlation-result-filename",
+        default='correlation_results.csv',
+        type=str,
+        help="the calculated correlation result filename, which will be saved as a CSV file",
+    )
+    parser.add_argument(
         "--n-jobs",
         default=1,
         type=int,
@@ -283,7 +289,6 @@ if __name__ == "__main__":
     replace_with_miniCor_df=replace_with_miniCor(unfiltered_csv_df, significant_rows, replace_with_miniCor_filename)
     
     # filter p值小于0.05
-    filter_p_filename=tmp_result_path+f'corr_pval_final_CD_sediment_pos_3SD_20240828_miniCor_p0.05.csv'
-    filter_p(replace_with_miniCor_df, filter_p_filename)
+    filter_p(replace_with_miniCor_df, args.correlation_result_filename)
     
     print("Spend time: ", time.time() - start_time)

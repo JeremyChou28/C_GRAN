@@ -6,6 +6,7 @@ from tqdm import tqdm
 
 def parse_args():
     parser = argparse.ArgumentParser(description="Construct molecular network.")
+    # online parameters
     parser.add_argument(
         "--source_target_file",
         default="source_target.csv",
@@ -13,6 +14,21 @@ def parse_args():
         required=True,
         help="input seednode file",
     )
+    parser.add_argument(
+        "--threshold",
+        type=float,
+        default=0.7,
+        required=True,
+        help="the threshold for filtering high correlation compounds",
+    )
+    parser.add_argument(
+        "--RT_threshold",
+        type=float,
+        default=0.01,
+        required=True,
+        help="the threshold for filtering based on retention time (RT)",
+    )
+    # offline parameters
     parser.add_argument(
         "--correlation_file",
         type=str,
@@ -48,16 +64,16 @@ def merge_source_target_cor(source_target_df, correlation_df, output_filename):
     merged.to_csv(output_filename, index=False)
     return merged
 
-def edit_molecular_network(source_target_cor_df, output_filename):
+def edit_molecular_network(source_target_cor_df, output_filename, threshold, RT_threshold):
     # 初始化进度条（2 步）
     with tqdm(total=2, desc="Filtering data") as pbar:
         
         # Step 1: 保留 Correlation > 0.7 的行  #这个相关性的阈值为之前筛选高相关物质时用户输入的阈值
-        df_filtered = source_target_cor_df[source_target_cor_df['Correlation'] > 0.7].copy()
+        df_filtered = source_target_cor_df[source_target_cor_df['Correlation'] > threshold].copy()
         pbar.update(1)
         
         # Step 2: 删除 abs(source_RT - target_RT) < 0.01 且 Correlation > 0.9 的行
-        condition = (df_filtered['Correlation'] > 0.9) & (abs(df_filtered['source_RT'] - df_filtered['target_RT']) < 0.01)
+        condition = (abs(df_filtered['source_RT'] - df_filtered['target_RT']) < RT_threshold) &  (df_filtered['Correlation'] > 0.9) 
         df_final = df_filtered[~condition].copy()
         pbar.update(1)
 
@@ -85,6 +101,6 @@ if __name__ == "__main__":
     
     # 编辑分子网络
     output_filename = tmp_result_path + 'source_target_cor_edit.csv'
-    edit_molecular_network(source_target_cor_df, output_filename)
+    edit_molecular_network(source_target_cor_df, output_filename, args.threshold, args.RT_threshold)
     
     print("Spend time: ", time.time() - start_time)

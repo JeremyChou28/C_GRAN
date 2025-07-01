@@ -6,6 +6,7 @@ import argparse
 
 def parse_args():
     parser = argparse.ArgumentParser(description="Filter high correlation compounds and generate high correlated nodes.")
+    # online parameters
     parser.add_argument(
         "--seednode_file",
         default="seednode.csv",
@@ -14,11 +15,19 @@ def parse_args():
         help="input seednode file",
     )
     parser.add_argument(
+        "--threshold",
+        type=float,
+        default=0.7,
+        required=True,
+        help="the threshold for filtering high correlation compounds",
+    )
+    # offline parameters
+    parser.add_argument(
         "--correlation_file",
         type=str,
         required=True,
         help="input correlation file",
-    )
+    )    
     return parser.parse_args()
 
 def filter_according_to_substance(correlation_df, seednode_df, output_filename):
@@ -39,9 +48,9 @@ def filter_according_to_substance(correlation_df, seednode_df, output_filename):
         pbar.update(filtered_df.shape[0])
     return filtered_df
 
-def generate_high_correlated_nodes(df, output_filename):
+def generate_high_correlated_nodes(df, output_filename, threshold):
     # 筛选出 Correlation 大于 0.7 的行  (该阈值由用户自定义)
-    filtered_df = df[df['Correlation'] > 0.7]
+    filtered_df = df[df['Correlation'] > threshold]
 
     # 初始化进度条：总共处理两列数据
     with tqdm(total=2, desc="Processing IDs") as pbar:
@@ -74,6 +83,6 @@ if __name__ == "__main__":
     
     # 生成高相关性节点
     high_correlated_nodes_filename=tmp_result_path+'high_correlated_nodes.csv'
-    generate_high_correlated_nodes(filtered_df,high_correlated_nodes_filename)
+    generate_high_correlated_nodes(filtered_df,high_correlated_nodes_filename,args.threshold)
     
     print("Spend time: ", time.time() - start_time)

@@ -36,7 +36,7 @@ pip install -r requirements.txt
 ```sh
 cd src/1_calculate_correlation
 
-python calculate_correlation.py --input-data test_files/test.txt --compounds-num 14 --samples-num 98
+python calculate_correlation.py --input-data test_files/test.txt --compounds-num 14 --samples-num 98 --correlation-result-filename correlation_results.csv
 ```
 
 2. Filter compounds with high correlation values
@@ -44,7 +44,7 @@ python calculate_correlation.py --input-data test_files/test.txt --compounds-num
 ```sh
 cd src/2_filter_high_correlation_compounds
 
-python filter_high_correlation_compounds.py --correlation_file ../1_calculate_correlation/corr_pval_final_CD_sediment_pos_3SD_20240828_true_p0.05.csv --seednode_file test_files/seednode.csv
+python filter_high_correlation_compounds.py --correlation_file ../1_calculate_correlation/corr_pval_final_CD_sediment_pos_3SD_20240828_true_p0.05.csv --seednode_file test_files/seednode.csv --threshold 0.7
 ```
 
 3. Construct molecular network
@@ -52,7 +52,7 @@ python filter_high_correlation_compounds.py --correlation_file ../1_calculate_co
 ```sh
 cd src/3_construct_molecular_network
 
-python construct_molecular_network.py --source_target_file test_files/source_target.csv --correlation_file ../1_calculate_correlation/corr_pval_final_CD_sediment_pos_3SD_20240828_true_p0.05.csv
+python construct_molecular_network.py --source_target_file test_files/source_target.csv --correlation_file ../1_calculate_correlation/corr_pval_final_CD_sediment_pos_3SD_20240828_true_p0.05.csv --threshold 0.7 --RT_threshold 0.01
 ```
 
 
@@ -68,21 +68,20 @@ or you could download our prepared pubchem database from the [google drive](http
 
 then, run this script for searching candidates:
 ```sh
-python search_candidates.py --molecular_network_file test_files/source_target_cor_edit.csv --pubchem_database_path ./pubchem_database.pk --candidates_folder ./candidates/
+python search_candidates.py --molecular_network_file test_files/source_target_cor_edit.csv --pubchem_database_path ./pubchem_database.pk --candidates_folder ./candidates/ --is_filter_element --element_set 'C,H,O,N,P,S,F,Cl,Br,I'
 ```
 
 5. Annotation
 
-First, you should prepare the [CFMID](https://hub.docker.com/r/wishartlab/cfmid) environment, and then you could run the example step by step as follows:
+- 5.1 Naive annotation
+
+you could run the example step by step as follows:
 
 ```sh
 cd src/5_annotation
-
 python preprocess.py --molecular_network_file ./test_files/source_target_cor_edit.csv --seednode_file ./test_files/seednode.csv --candidates_folder ../4_search_candidates/candidates
 
-python cfmid_prediction.py --num_containers 10 --spectrum_file ./test_files/compounds_spectrum.mgf
-
-python postprocess.py --seednode_file ./test_files/seednode.csv
+python naive_prediction.py --molecular_network_file ./test_files/source_target_cor_edit.csv --seednode_file ./test_files/seednode.csv --threshold_tanimoto_similarity 0.5
 ```
 
 or you run the iterative annotation as follows:
@@ -90,8 +89,31 @@ or you run the iterative annotation as follows:
 ```sh
 cd src/5_annotation
 
-python run_iterative_annotation.py --molecular_network_file ./test_files/source_target_cor_edit.csv --seednode_file ./test_files/seednode.csv --candidates_folder ../4_search_candidates/candidates --num_containers 10 --spectrum_file ./test_files/compounds_spectrum.mgf
+python run_naive_iterative_annotation.py --molecular_network_file ./test_files/source_target_cor_edit.csv --seednode_file ./test_files/seednode.csv --candidates_folder ../4_search_candidates/candidates --threshold_tanimoto_similarity 0.5 
 ```
+
+
+- 5.2 Annotation with CFM-ID
+
+First, you should prepare the [CFMID](https://hub.docker.com/r/wishartlab/cfmid) environment, and then you could run the example step by step as follows:
+
+```sh
+cd src/5_annotation
+python preprocess.py --molecular_network_file ./test_files/source_target_cor_edit.csv --seednode_file ./test_files/seednode.csv --candidates_folder ../4_search_candidates/candidates
+
+python cfmid_prediction.py --num_containers 10 --tolerance 0.1 --energy_level 0 --spectrum_file ./test_files/compounds_spectrum.mgf
+
+python postprocess.py --seednode_file ./test_files/seednode.csv --threshold_modified_cosine_similarity 0.7
+```
+
+or you run the iterative annotation as follows:
+
+```sh
+cd src/5_annotation
+
+python run_iterative_annotation.py --molecular_network_file ./test_files/source_target_cor_edit.csv --seednode_file ./test_files/seednode.csv --candidates_folder ../4_search_candidates/candidates --num_containers 10 --tolerance 0.1 --energy_level 0 --threshold_modified_cosine_similarity 0.5 --spectrum_file ./test_files/compounds_spectrum.mgf
+```
+
 
 <!-- <p align="right">(<a href="#readme-top">back to top</a>)</p> -->
 
