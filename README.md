@@ -44,7 +44,7 @@ python calculate_correlation.py --input-data test_files/test.txt --compounds-num
 ```sh
 cd src/2_filter_high_correlation_compounds
 
-python filter_high_correlation_compounds.py --correlation_file ../1_calculate_correlation/corr_pval_final_CD_sediment_pos_3SD_20240828_true_p0.05.csv --seednode_file test_files/seednode.csv --threshold 0.7
+python filter_high_correlation_compounds.py --correlation_file ../1_calculate_correlation/correlation_results.csv --seednode_file test_files/seednode.csv --threshold 0.7
 ```
 
 3. Construct molecular network
@@ -79,6 +79,7 @@ you could run the example step by step as follows:
 
 ```sh
 cd src/5_annotation
+
 python preprocess.py --molecular_network_file ./test_files/source_target_cor_edit.csv --seednode_file ./test_files/seednode.csv --candidates_folder ../4_search_candidates/candidates
 
 python naive_prediction.py --molecular_network_file ./test_files/source_target_cor_edit.csv --seednode_file ./test_files/seednode.csv --threshold_tanimoto_similarity 0.5
@@ -99,6 +100,7 @@ First, you should prepare the [CFMID](https://hub.docker.com/r/wishartlab/cfmid)
 
 ```sh
 cd src/5_annotation
+
 python preprocess.py --molecular_network_file ./test_files/source_target_cor_edit.csv --seednode_file ./test_files/seednode.csv --candidates_folder ../4_search_candidates/candidates
 
 python cfmid_prediction.py --num_containers 10 --tolerance 0.1 --energy_level 0 --spectrum_file ./test_files/compounds_spectrum.mgf
