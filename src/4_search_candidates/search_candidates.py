@@ -24,7 +24,6 @@ def parse_args():
     )
     parser.add_argument(
         "--is_filter_element",
-        type=str,
         action='store_true',
         default=True,
         help="whether to filter candidates by element set",
@@ -207,8 +206,9 @@ def filter_candidates_by_smiles(input_folder, output_folder):
                 df_filtered.to_csv(output_path, index=False)
 
             except Exception as e:
-                print(f"❌ Error processing {file}: {e}")
-
+                # print(f"❌ Error processing {file}: {e}")
+                print(f"{file} is empty or has no valid data, skipped.")
+                continue
             pbar.update(1)
 
 

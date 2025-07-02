@@ -30,6 +30,13 @@ def parse_args():
         required=True,
         help="the threshold for tanimoto similarity to filter the results",
     )
+    parser.add_argument(
+        "--max_iterations",
+        default=100,
+        type=int,
+        required=True,
+        help="the maximum number of iterations to run the annotation process",
+    )
     return parser.parse_args()
 
 
@@ -71,7 +78,7 @@ if __name__ == "__main__":
     all_nodes = set(source_nodes + target_nodes)
 
     # 循环直到 seednode 中包含所有节点
-    max_rounds = 100  # 防止死循环，你也可以去掉
+    max_rounds = args.max_iterations  # 防止死循环，你也可以去掉
     round_num = 0
 
     while round_num < max_rounds:
