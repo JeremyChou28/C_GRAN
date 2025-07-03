@@ -37,6 +37,14 @@ def parse_args():
         help="the energy level of the spectrum data predicted by CFM-ID, 0 represents low, 1 represents medium, and 2 represents high energy level",
     )
     parser.add_argument(
+        "--ion_mode",
+        default="positive",
+        type=str,
+        required=True,
+        choices=["positive", "negative"],
+        help="the ion mode of the spectrum data predicted by CFM-ID, positive or negative",
+    )
+    parser.add_argument(
         "--spectrum_file",
         default="./test_files/compounds_spectrum.mgf",
         type=str,
@@ -46,8 +54,9 @@ def parse_args():
     return parser.parse_args()
 
 class CFMDockerController:
-    def __init__(self, container_name="cfmid_runner", ):
+    def __init__(self, ion_mode, container_name="cfmid_runner"):
         self.container_name = container_name
+        self.ion_mode = ion_mode
 
     def start_container(self):
         cmd = (
@@ -60,6 +69,7 @@ class CFMDockerController:
     def predict(self, smiles, output_file, ppm=0.001,
                 model_dir="/trained_models_cfmid4.0/[M+H]+",
                 log_file="param_output.log", config_file="param_config.txt"):
+        model_dir = model_dir if self.ion_mode == "positive" else model_dir.replace("[M+H]+", "[M-H]-")
         cmd = (
             f"docker exec {self.container_name} "
             f"sh -c \"cd /cfmid/public && "
@@ -238,7 +248,7 @@ if __name__ == "__main__":
     # 启动多个容器
     for i in range(NUM_CONTAINERS):
         cname = f"cfmid_runner_{i}"
-        c = CFMDockerController(container_name=cname)
+        c = CFMDockerController(ion_mode=args.ion_mode, container_name=cname)
         c.start_container()
         controllers.append(c)
 

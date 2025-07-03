@@ -46,6 +46,14 @@ def parse_args():
         help="the energy level of the spectrum data predicted by CFM-ID, 0 represents low, 1 represents medium, and 2 represents high energy level",
     )
     parser.add_argument(
+        "--ion_mode",
+        default="positive",
+        type=str,
+        required=True,
+        choices=["positive", "negative"],
+        help="the ion mode of the spectrum data predicted by CFM-ID, positive or negative",
+    )
+    parser.add_argument(
         "--threshold_modified_cosine_similarity",
         default=0.5,
         type=float,
@@ -107,7 +115,7 @@ if __name__ == "__main__":
 
         # 依次运行三个脚本
         subprocess.run(["python", "preprocess.py", "--molecular_network_file", args.molecular_network_file, "--seednode_file", seednode_file, "--candidates_folder", args.candidates_folder], check=True)
-        subprocess.run(["python", "cfmid_prediction.py", "--num_containers", str(args.num_containers), "--tolerance", str(args.tolerance),"--energy_level", str(args.energy_level), "--spectrum_file", args.spectrum_file], check=True)
+        subprocess.run(["python", "cfmid_prediction.py", "--num_containers", str(args.num_containers), "--tolerance", str(args.tolerance),"--energy_level", str(args.energy_level), "--ion_mode", args.ion_mode, "--spectrum_file", args.spectrum_file], check=True)
         subprocess.run(["python", "postprocess.py","--seednode_file",seednode_file,"--threshold_modified_cosine_similarity",str(args.threshold_modified_cosine_similarity)], check=True)
 
         seednode_file='tmp/seednode.csv'
