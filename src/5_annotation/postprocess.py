@@ -102,7 +102,6 @@ def filter_annotation(
 
     # 保存结果
     df_final.sort_values(by="CFM-ID_score", inplace=True)
-
     df_final.to_csv(output_file, index=False)
 
 
