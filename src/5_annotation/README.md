@@ -42,3 +42,8 @@ cd src/5_annotation
 python run_iterative_annotation.py --molecular_network_file ./test_files/source_target_cor_edit.csv --seednode_file ./test_files/seednode.csv --candidates_folder ../4_search_candidates/candidates --num_containers 10 --tolerance 0.1 --energy_level 0 --ion_mode positive --threshold_modified_cosine_similarity 0.5 --spectrum_file ./test_files/compounds_spectrum.mgf --max_iterations 100 --top_k 10
 ```
 
+Finally, you could download the molecular structure images as follows:
+
+```sh
+python download_mol_imgs.py --annotation_result_file final_annotation_results.csv --structure_image_folder mol_imgs/
+```

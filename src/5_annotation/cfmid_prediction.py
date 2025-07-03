@@ -11,6 +11,7 @@ from matchms import Spectrum
 from matchms.similarity import ModifiedCosine
 from functools import partial
 
+
 def parse_args():
     parser = argparse.ArgumentParser(description="CFM prediction.")
     # offline parameters
@@ -53,6 +54,7 @@ def parse_args():
     )
     return parser.parse_args()
 
+
 class CFMDockerController:
     def __init__(self, ion_mode, container_name="cfmid_runner"):
         self.container_name = container_name
@@ -66,13 +68,23 @@ class CFMDockerController:
         subprocess.run(cmd, shell=True, check=True)
         print(f"✅ 容器 {self.container_name} 已启动")
 
-    def predict(self, smiles, output_file, ppm=0.001,
-                model_dir="/trained_models_cfmid4.0/[M+H]+",
-                log_file="param_output.log", config_file="param_config.txt"):
-        model_dir = model_dir if self.ion_mode == "positive" else model_dir.replace("[M+H]+", "[M-H]-")
+    def predict(
+        self,
+        smiles,
+        output_file,
+        ppm=0.001,
+        model_dir="/trained_models_cfmid4.0/[M+H]+",
+        log_file="param_output.log",
+        config_file="param_config.txt",
+    ):
+        model_dir = (
+            model_dir
+            if self.ion_mode == "positive"
+            else model_dir.replace("[M+H]+", "[M-H]-")
+        )
         cmd = (
             f"docker exec {self.container_name} "
-            f"sh -c \"cd /cfmid/public && "
+            f'sh -c "cd /cfmid/public && '
             f"cfm-predict '{smiles}' {ppm} {model_dir}/{log_file} {model_dir}/{config_file} 0 {output_file}\""
         )
         # print(f"⏳ 正在预测: {smiles} → {output_file}")
@@ -84,81 +96,88 @@ class CFMDockerController:
         print(f"🛑 容器 {self.container_name} 已停止并删除")
 
 
-def calculate_modified_cosine_similarity(prediction_ms, prediction_peaks, target_node_id, all_target_spectra, tolerance):
-    target_node_ms = all_target_spectra.get(target_node_id, None)['params']['PEPMASS']
-    target_node_peaks = all_target_spectra.get(target_node_id, None)['peaks']
-    
+def calculate_modified_cosine_similarity(
+    prediction_ms, prediction_peaks, target_node_id, all_target_spectra, tolerance
+):
+    target_node_ms = all_target_spectra.get(target_node_id, None)["params"]["PEPMASS"]
+    target_node_peaks = all_target_spectra.get(target_node_id, None)["peaks"]
+
     target_node_mz_list, target_node_intensity_list = [], []
     for mz, intensity in target_node_peaks:
         target_node_mz_list.append(mz)
         target_node_intensity_list.append(intensity)
-    
+
     prediction_mz_list, prediction_intensity_list = [], []
     for mz, intensity in prediction_peaks:
         prediction_mz_list.append(mz)
         prediction_intensity_list.append(intensity)
-    
-    prediction_spectrum = Spectrum(mz=np.array(prediction_mz_list),
-                        intensities=np.array(prediction_intensity_list),
-                        metadata={"precursor_mz": prediction_ms})
-    target_spectrum = Spectrum(mz=np.array(target_node_mz_list),
-                        intensities=np.array(target_node_intensity_list),
-                        metadata={"precursor_mz": target_node_ms})
-                        
+
+    prediction_spectrum = Spectrum(
+        mz=np.array(prediction_mz_list),
+        intensities=np.array(prediction_intensity_list),
+        metadata={"precursor_mz": prediction_ms},
+    )
+    target_spectrum = Spectrum(
+        mz=np.array(target_node_mz_list),
+        intensities=np.array(target_node_intensity_list),
+        metadata={"precursor_mz": target_node_ms},
+    )
+
     modified_cosine = ModifiedCosine(tolerance=tolerance)
 
-    score = modified_cosine.pair(prediction_spectrum, target_spectrum)['score']
+    score = modified_cosine.pair(prediction_spectrum, target_spectrum)["score"]
     return score
-        
+
 
 def parse_groundtruth_spectrum(groundtruth_spectrum):
     spectra = {}
     current_spectrum = None
-    
-    with open(groundtruth_spectrum, 'r') as f:
+
+    with open(groundtruth_spectrum, "r") as f:
         for line in f:
             line = line.strip()
             if not line:  # 跳过空行
                 continue
-            
-            if line.startswith('BEGIN IONS'):
+
+            if line.startswith("BEGIN IONS"):
                 # 开始新的谱图
-                current_spectrum = {'params': {}, 'peaks': []}
-            
-            elif line.startswith('END IONS'):
+                current_spectrum = {"params": {}, "peaks": []}
+
+            elif line.startswith("END IONS"):
                 # 结束当前谱图
                 if current_spectrum is not None:
-                    spectra[current_spectrum['params']['MATCH_ID']]=current_spectrum
+                    spectra[current_spectrum["params"]["MATCH_ID"]] = current_spectrum
                 current_spectrum = None
-            
+
             else:
                 # 如果在谱图块内，就处理具体的信息
                 if current_spectrum is not None:
                     # 判断是否是 key=value 格式
-                    if '=' in line:
-                        key, value = line.split('=', 1)
-                        current_spectrum['params'][key.strip()] = value.strip()
+                    if "=" in line:
+                        key, value = line.split("=", 1)
+                        current_spectrum["params"][key.strip()] = value.strip()
                     else:
                         # 否则认为是峰表数据
                         parts = line.split()
                         if len(parts) >= 2:
                             mz = float(parts[0])
                             intensity = float(parts[1])
-                            current_spectrum['peaks'].append((mz, intensity))
+                            current_spectrum["peaks"].append((mz, intensity))
                         # 如果有第三列可继续处理
         f.close()
     return spectra
 
+
 def parse_prediction_spectrum(prediction_spectrum_file, energy_level):
     with open(prediction_spectrum_file, "r") as f:
-        content = f.read()      
+        content = f.read()
         f.close()
-        
+
     if not content.strip():
         os.remove(prediction_spectrum_file)
         print(f"已删除内容为空的文件: {prediction_spectrum_file}")
         return None, []
-    
+
     lines = content.strip().splitlines()
     pmass = None
     peaks = []
@@ -169,7 +188,7 @@ def parse_prediction_spectrum(prediction_spectrum_file, energy_level):
         if line.startswith("#PMass="):
             pmass = float(line.split("=")[-1])
         elif line.startswith("energy"):
-            in_target_energy = (int(line.split("energy")[-1]) == energy_level)
+            in_target_energy = int(line.split("energy")[-1]) == energy_level
         elif in_target_energy and line:
             try:
                 mz, intensity = map(float, line.split())
@@ -182,16 +201,22 @@ def parse_prediction_spectrum(prediction_spectrum_file, energy_level):
 def process_smiles(args):
     idx, smile, output_file, container_idx, target_node_id, all_target_spectra = args
     controller = controllers[container_idx]
-    
+
     try:
         controller.predict(smile, output_file)
-        prediction_ms, prediction_peaks = parse_prediction_spectrum(output_file, args.energy_level)
-        
+        prediction_ms, prediction_peaks = parse_prediction_spectrum(
+            output_file, args.energy_level
+        )
+
         if prediction_ms is None or not prediction_peaks:
             return idx, np.nan
-        
+
         score = calculate_modified_cosine_similarity(
-            prediction_ms, prediction_peaks, target_node_id, all_target_spectra, args.tolerance
+            prediction_ms,
+            prediction_peaks,
+            target_node_id,
+            all_target_spectra,
+            args.tolerance,
         )
         if score < args.threshold_modified_cosine_similarity:
             return idx, np.nan
@@ -204,11 +229,13 @@ def process_smiles(args):
 
 def process_file(file, file_type, all_target_spectra):
     prefix = "not_unique" if file_type == "not_unique" else "unique"
-    folder = f"tmp/Seednode_and_Targetnode_Morgan_Similarity_score_split_{prefix}_Top10/"
-    
+    folder = (
+        f"tmp/Seednode_and_Targetnode_Morgan_Similarity_score_split_{prefix}_Top10/"
+    )
+
     df = pd.read_csv(os.path.join(folder, file))
-    smiles = df['SMILES'].values.tolist()
-    target_node_id = file.split('.csv')[0]
+    smiles = df["SMILES"].values.tolist()
+    target_node_id = file.split(".csv")[0]
     os.makedirs(f"tmp/cfmid_spectrum_results/{target_node_id}", exist_ok=True)
 
     # 准备任务
@@ -216,14 +243,16 @@ def process_file(file, file_type, all_target_spectra):
     for i, smile in enumerate(smiles):
         output_file = f"tmp/cfmid_spectrum_results/{target_node_id}/{i}.txt"
         container_idx = i % NUM_CONTAINERS  # 简单轮询分配容器
-        tasks.append((i, smile, output_file, container_idx, target_node_id, all_target_spectra))
+        tasks.append(
+            (i, smile, output_file, container_idx, target_node_id, all_target_spectra)
+        )
 
     # 多进程并行
     with Pool(processes=NUM_CONTAINERS) as pool:
         results = pool.map(process_smiles, tasks)
 
     for idx, score in results:
-        df.at[idx, 'CFM-ID_score'] = score
+        df.at[idx, "CFM-ID_score"] = score
 
     output_csv = f"tmp/cfmid_score_results/{target_node_id}.csv"
     df.to_csv(output_csv, index=False)
@@ -231,20 +260,25 @@ def process_file(file, file_type, all_target_spectra):
 
 if __name__ == "__main__":
     start_time = time.time()
-    
-    args= parse_args()
-    
+
+    args = parse_args()
+
     # 读取not_unique和unique文件夹下的文件
-    not_unique_files = os.listdir("tmp/Seednode_and_Targetnode_Morgan_Similarity_score_split_not_unique_Top10/")
-    unique_files = os.listdir("tmp/Seednode_and_Targetnode_Morgan_Similarity_score_split_unique_Top10/")
+    not_unique_files = os.listdir(
+        "tmp/Seednode_and_Targetnode_Morgan_Similarity_score_split_not_unique_Top10/"
+    )
+    unique_files = os.listdir(
+        "tmp/Seednode_and_Targetnode_Morgan_Similarity_score_split_unique_Top10/"
+    )
 
     os.makedirs("tmp/cfmid_score_results", exist_ok=True)
-    
+
     # 读取目标节点的mgf文件并解析
-    all_target_spectra = parse_groundtruth_spectrum(args.spectrum_file) 
+    all_target_spectra = parse_groundtruth_spectrum(args.spectrum_file)
 
-
-    NUM_CONTAINERS = min(args.num_containers, cpu_count())  # 根据CPU核心数创建4个或更少容器
+    NUM_CONTAINERS = min(
+        args.num_containers, cpu_count()
+    )  # 根据CPU核心数创建4个或更少容器
     controllers = []
 
     # 启动多个容器
@@ -255,12 +289,12 @@ if __name__ == "__main__":
         controllers.append(c)
 
     for file in tqdm(not_unique_files, desc="Processing not_unique files"):
-        if file.endswith('.csv'):
-            process_file(file, 'not_unique', all_target_spectra)
+        if file.endswith(".csv"):
+            process_file(file, "not_unique", all_target_spectra)
 
     for file in tqdm(unique_files, desc="Processing unique files"):
-        if file.endswith('.csv'):
-            process_file(file, 'unique', all_target_spectra)
+        if file.endswith(".csv"):
+            process_file(file, "unique", all_target_spectra)
 
     for c in controllers:
         c.stop_container()

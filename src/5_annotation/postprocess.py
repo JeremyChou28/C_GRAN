@@ -98,10 +98,13 @@ def filter_annotation(
         columns_to_keep = ["ID", "CID", "MW", "SMILES", "Formula", "CFM-ID_score"]
         df_final = df_filtered[columns_to_keep].copy()
         df_final["ID"] = df_final["ID"].astype(int)
+        # 将CFM-ID_score列名修改为score
+        df_final.rename(columns={"CFM-ID_score": "score"}, inplace=True)
+
         pbar.update(1)
 
     # 保存结果
-    df_final.sort_values(by="CFM-ID_score", inplace=True)
+    df_final.sort_values(by="score", inplace=True)
     df_final.to_csv(output_file, index=False)
 
 
