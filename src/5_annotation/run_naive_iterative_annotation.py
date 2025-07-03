@@ -52,12 +52,12 @@ def merge_naive_results(tmp_folder, output_file):
         # 提取 ID（文件名去掉 .csv）
         id_value = os.path.splitext(file)[0]
 
-        # 统一字段：确保包含 weighted_score 列（若无则补 NaN）
-        if "weighted_score" not in df.columns:
-            df["weighted_score"] = pd.NA  # 或 None
+        # 将weights_score的数据填到score列
+        if "weighted_score" in df.columns:
+            df["score"] = df["weighted_score"]
 
         # 保留并重排你需要的列
-        df = df[["CID", "MW", "SMILES", "Formula", "score", "weighted_score"]]
+        df = df[["CID", "MW", "SMILES", "Formula", "score"]]
         df.insert(0, "ID", id_value)  # 将 ID 插入第一列
 
         df_list.append(df)
