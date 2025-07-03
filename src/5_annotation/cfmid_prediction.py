@@ -146,11 +146,13 @@ def parse_groundtruth_spectrum(groundtruth_spectrum):
                             intensity = float(parts[1])
                             current_spectrum['peaks'].append((mz, intensity))
                         # 如果有第三列可继续处理
+        f.close()
     return spectra
 
 def parse_prediction_spectrum(prediction_spectrum_file, energy_level):
     with open(prediction_spectrum_file, "r") as f:
         content = f.read()      
+        f.close()
         
     if not content.strip():
         os.remove(prediction_spectrum_file)

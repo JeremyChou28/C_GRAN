@@ -117,6 +117,7 @@ def save_results_to_csv(result_dict, save_dir="./result_csv"):
             writer.writerow(["CID", "MW", "SMILES", "Formula"])  # Write header
             for cid, mw, smiles, formula in candidates:
                 writer.writerow([cid, mw, smiles, formula])  # Write data
+        f.close()
 
 def search_candidates_by_mw(input_data, pubchem_dict, candidates_folder, ppm_threshold):
     # 解析 CID 和 目标分子量
@@ -239,6 +240,7 @@ if __name__ == "__main__":
     print("Loading pubchem database...")
     with open(args.pubchem_database_path, 'rb') as f:
         pubchem_dict = pk.load(f)
+        f.close()
 
     # 根据分子质量的ppm误差范围搜索 PubChem 数据库中符合条件的分子
     tmp_candidates_folder=tmp_result_path+"candidates"
