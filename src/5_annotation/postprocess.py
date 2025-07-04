@@ -94,17 +94,24 @@ def filter_annotation(
         ].copy()
         pbar.update(1)
 
+        df_filtered.rename(columns={"Seednode": "Seed Node"}, inplace=True)
+        df_filtered.rename(columns={"CFM-ID_score": "Score"}, inplace=True)
+        df_filtered.rename(columns={"MW": "MonoIsotopic Weight"}, inplace=True)
+
         # Step 2: 只保留指定列
-        columns_to_keep = ["ID", "CID", "MW", "SMILES", "Formula", "CFM-ID_score"]
+        columns_to_keep = ["ID", "Seed Node", "CID", "MonoIsotopic Weight", "SMILES", "Formula", "Score"]
         df_final = df_filtered[columns_to_keep].copy()
         df_final["ID"] = df_final["ID"].astype(int)
-        # 将CFM-ID_score列名修改为score
-        df_final.rename(columns={"CFM-ID_score": "score"}, inplace=True)
+        # 将CID列改成超链接
+        df_final["CID"] = "https://pubchem.ncbi.nlm.nih.gov/compound/" + df_final["CID"].astype(str)
+        
+        df_final['Seed Node'] = df_final['Seed Node'].apply(lambda x: '' if pd.isna(x) else str(int(x)))
 
+        
         pbar.update(1)
 
     # 保存结果
-    df_final.sort_values(by="score", inplace=True)
+    df_final.sort_values(by="Score", inplace=True)
     df_final.to_csv(output_file, index=False)
 
 

@@ -56,6 +56,21 @@ def save_image(mol, out_path, size=(400, 400), fmt="png"):
         out_path.write_text(svg, encoding="utf-8")
 
 
+def generate_final_output(annotation_results, output_file):
+    # 将mol_imgs文件夹中的图片链接添加到DataFrame中
+    annotation_results["Structure"] = annotation_results["ID"].apply(
+        lambda x: f'mol_imgs/{x}.png'
+    )
+    
+    # 重排列顺序
+    columns_order = [
+        "ID", "Seed Node", "Structure", "CID", "MonoIsotopic Weight", "SMILES", "Formula", "Score"
+    ]
+    annotation_results = annotation_results[columns_order]
+    # 保存最终结果
+    annotation_results.to_csv(output_file, index=False)
+    
+    
 if __name__ == "__main__":
     args = parse_args()
     os.makedirs(args.structure_image_folder, exist_ok=True)
@@ -73,3 +88,7 @@ if __name__ == "__main__":
         id_ = row.get("ID", "unknown_id")
         mol_img_filename = args.structure_image_folder + f"{id_}.{args.format}"
         save_image(mol, mol_img_filename, size=args.size, fmt=args.format)
+
+    # 生成最终输出文件
+    output_file = "final_annotation_results_with_structures.csv"
+    generate_final_output(annotation_results, output_file)

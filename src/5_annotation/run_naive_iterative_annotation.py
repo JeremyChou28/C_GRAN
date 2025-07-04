@@ -38,6 +38,13 @@ def parse_args():
         required=True,
         help="the maximum number of iterations to run the annotation process",
     )
+    parser.add_argument(
+        "--top_k",
+        type=int,
+        required=True,
+        default=10,
+        help="the top k candidates for annotation",
+    )
     return parser.parse_args()
 
 
@@ -52,13 +59,15 @@ def merge_naive_results(tmp_folder, output_file):
         # 提取 ID（文件名去掉 .csv）
         id_value = os.path.splitext(file)[0]
 
-        # 将weights_score的数据填到score列
-        if "weighted_score" in df.columns:
-            df["score"] = df["weighted_score"]
+        df.rename(columns={"Seednode": "Seed Node"}, inplace=True)
+        df.rename(columns={"weighted_score": "Score"}, inplace=True)
+        df.rename(columns={"MW": "MonoIsotopic Weight"}, inplace=True)
 
         # 保留并重排你需要的列
-        df = df[["CID", "MW", "SMILES", "Formula", "score"]]
+        df = df[["Seed Node", "CID", "MonoIsotopic Weight", "SMILES", "Formula", "Score"]]
         df.insert(0, "ID", id_value)  # 将 ID 插入第一列
+        df["CID"] = "https://pubchem.ncbi.nlm.nih.gov/compound/" + df["CID"].astype(str)
+        df['Seed Node'] = df['Seed Node'].apply(lambda x: '' if pd.isna(x) else str(int(x)))
 
         df_list.append(df)
 
