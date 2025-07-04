@@ -152,6 +152,10 @@ if __name__ == "__main__":
                 args.ion_mode,
                 "--spectrum_file",
                 args.spectrum_file,
+                "--top_k",
+                str(args.top_k),
+                "--threshold_modified_cosine_similarity",
+                str(args.threshold_modified_cosine_similarity),
             ],
             check=True,
         )
@@ -161,8 +165,6 @@ if __name__ == "__main__":
                 "postprocess.py",
                 "--seednode_file",
                 seednode_file,
-                "--threshold_modified_cosine_similarity",
-                str(args.threshold_modified_cosine_similarity),
             ],
             check=True,
         )

@@ -208,6 +208,11 @@ def pickle_topk_unique_seednode(unique_folder, topk):
     # 初始化进度条
     with tqdm(total=len(csv_files), desc="Filtering top score rows") as pbar:
         for filename in csv_files:
+            base_name = filename[:-4]  # 去掉 .csv
+            target_str, seed_str = base_name.split("_")
+            targetnode = eval(target_str)
+            seednode = eval(seed_str)
+
             filepath = os.path.join(unique_folder, filename)
             try:
                 df = pd.read_csv(filepath)
@@ -222,12 +227,12 @@ def pickle_topk_unique_seednode(unique_folder, topk):
                     df_filtered = df
                 else:
                     threshold_score = sorted(scores, reverse=True)[topk - 1]
-                    df_filtered = df[df["score"] >= threshold_score]
+                    df_filtered = df[df["score"] >= threshold_score].copy()
 
-                # 输出文件名：取第一个数值部分整数形式
-                prefix = filename.split("_")[0]  # 例如 '262.0'
-                output_filename = f"{int(float(prefix))}.csv"
-                output_path = os.path.join(output_folder, output_filename)
+                output_path = output_folder+f"/{targetnode}.csv"
+
+                df_filtered["Targetnode"] = targetnode
+                df_filtered["Seednode"] = seednode
 
                 # 保存（覆盖）
                 df_filtered.to_csv(output_path, index=False)
@@ -339,6 +344,10 @@ if __name__ == "__main__":
     )
 
     # 计算tanimoto similarity
+    seed_target_tanimoto_folder = (
+        tmp_result_path + "Seednode_and_Targetnode_Morgan_Similarity_score"
+    )
+    os.makedirs(seed_target_tanimoto_folder, exist_ok=True)
     calculate_tanimoto_similarity(
         seednode_df,
         edges_df,
@@ -362,14 +371,11 @@ if __name__ == "__main__":
     not_unique_csv = (
         tmp_result_path + "Seednode_and_Targetnode_not_unique_seednodes.csv"
     )
-    seed_target_tanimoto_folder = (
-        tmp_result_path + "Seednode_and_Targetnode_Morgan_Similarity_score"
-    )
+
     unique_folder = "tmp/Seednode_and_Targetnode_Morgan_Similarity_score_split_unique"
     not_unique_folder = (
         "tmp/Seednode_and_Targetnode_Morgan_Similarity_score_split_not_unique"
     )
-    os.makedirs(seed_target_tanimoto_folder, exist_ok=True)
     os.makedirs(unique_folder, exist_ok=True)
     os.makedirs(not_unique_folder, exist_ok=True)
 

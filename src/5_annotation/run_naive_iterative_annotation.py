@@ -60,9 +60,12 @@ def merge_naive_results(tmp_folder, output_file):
         id_value = os.path.splitext(file)[0]
 
         df.rename(columns={"Seednode": "Seed Node"}, inplace=True)
-        df.rename(columns={"weighted_score": "Score"}, inplace=True)
         df.rename(columns={"MW": "MonoIsotopic Weight"}, inplace=True)
 
+        if "weighted_score" in df.columns:
+            df['score'] = df['weighted_score']
+        df.rename(columns={"score": "Score"}, inplace=True)
+        
         # 保留并重排你需要的列
         df = df[["Seed Node", "CID", "MonoIsotopic Weight", "SMILES", "Formula", "Score"]]
         df.insert(0, "ID", id_value)  # 将 ID 插入第一列
@@ -122,6 +125,8 @@ if __name__ == "__main__":
                 seednode_file,
                 "--threshold_tanimoto_similarity",
                 str(args.threshold_tanimoto_similarity),
+                "--top_k",
+                str(args.top_k),
             ],
             check=True,
         )

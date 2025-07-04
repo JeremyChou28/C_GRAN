@@ -1,4 +1,4 @@
-# C_GRAN
+# C_GRAN (Community-Guided Recursive Annotation Network)
 
 ##  📗 Table of Contents
 
@@ -17,7 +17,7 @@
 <!-- - [🙏 Acknowledgements](#acknowledgements) -->
 
 ## 📖 About the Project <a name="about-project"></a>
-This is the project of C_GRAN implemented by Python.
+C-GRAN (Community-Guided Recursive Annotation Network) is an open, network-based framework for the systematic discovery and annotation of emerging structural analogs in complex environmental samples. Designed for non-target screening (NTS) using tandem mass spectrometry (MS/MS), C-GRAN integrates molecular networking with sample-wise co-occurrence analysis to uncover structurally or functionally related compounds beyond spectral similarity constraints. Starting from high-confidence seed annotations, candidate compounds are expanded through a recursive database search strategy, incorporating exact-mass-based matching. Each candidate is ranked based on structural similarity to known analogs, fragment match quality, and occurrence correlation. By iteratively propagating annotations across molecular networks, C-GRAN enables high-coverage identification of structurally diverse compounds—especially those missed by traditional spectral-based tools. 
 
 ## 💻 Getting Started <a name="getting-started"></a>
 

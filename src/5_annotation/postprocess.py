@@ -14,13 +14,6 @@ def parse_args():
         required=True,
         help="the original seednode file containing ID and SMILES",
     )
-    parser.add_argument(
-        "--threshold_modified_cosine_similarity",
-        default=0.5,
-        type=float,
-        required=True,
-        help="the threshold for modified cosine similarity to filter the results",
-    )
     return parser.parse_args()
 
 
@@ -81,26 +74,20 @@ def pick_final_annotation(cfmid_prediction_folder, output_file):
 
 
 def filter_annotation(
-    annotation_file, output_file, threshold_modified_cosine_similarity
+    annotation_file, output_file
 ):
     # 读取CSV文件
     df = pd.read_csv(annotation_file)
 
     # 初始化进度条
     with tqdm(total=2, desc="Filtering and selecting columns") as pbar:
-        # Step 1: 筛选 CFM-ID_score > 0.7  #用户自定义阈值
-        df_filtered = df[
-            df["CFM-ID_score"] > threshold_modified_cosine_similarity
-        ].copy()
-        pbar.update(1)
-
-        df_filtered.rename(columns={"Seednode": "Seed Node"}, inplace=True)
-        df_filtered.rename(columns={"CFM-ID_score": "Score"}, inplace=True)
-        df_filtered.rename(columns={"MW": "MonoIsotopic Weight"}, inplace=True)
+        df.rename(columns={"Seednode": "Seed Node"}, inplace=True)
+        df.rename(columns={"CFM-ID_score": "Score"}, inplace=True)
+        df.rename(columns={"MW": "MonoIsotopic Weight"}, inplace=True)
 
         # Step 2: 只保留指定列
         columns_to_keep = ["ID", "Seed Node", "CID", "MonoIsotopic Weight", "SMILES", "Formula", "Score"]
-        df_final = df_filtered[columns_to_keep].copy()
+        df_final = df[columns_to_keep].copy()
         df_final["ID"] = df_final["ID"].astype(int)
         # 将CID列改成超链接
         df_final["CID"] = "https://pubchem.ncbi.nlm.nih.gov/compound/" + df_final["CID"].astype(str)
@@ -130,7 +117,7 @@ if __name__ == "__main__":
 
     output_file = tmp_result_path + "annotation_results_filtered.csv"
     filter_annotation(
-        annotation_result_file, output_file, args.threshold_modified_cosine_similarity
+        annotation_result_file, output_file
     )
 
     # 生成下一轮的seednode file

@@ -31,6 +31,13 @@ def parse_args():
         required=True,
         help="the threshold for tanimoto similarity to filter the results",
     )
+    parser.add_argument(
+        "--top_k",
+        type=int,
+        required=True,
+        default=10,
+        help="the top k candidates for annotation",
+    )
     return parser.parse_args()
 
 
@@ -104,10 +111,10 @@ if __name__ == "__main__":
     all_nodes = set(source_nodes + target_nodes)
 
     unique_folder = (
-        "tmp/Seednode_and_Targetnode_Morgan_Similarity_score_split_unique_Top10"
+        f"tmp/Seednode_and_Targetnode_Morgan_Similarity_score_split_unique_Top{args.top_k}"
     )
     not_unique_folder = (
-        "tmp/Seednode_and_Targetnode_Morgan_Similarity_score_split_not_unique_Top10"
+        f"tmp/Seednode_and_Targetnode_Morgan_Similarity_score_split_not_unique_Top{args.top_k}"
     )
     naive_prediction_folder = "tmp/naive_prediction_results"
     os.makedirs(naive_prediction_folder, exist_ok=True)

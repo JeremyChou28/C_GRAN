@@ -52,6 +52,20 @@ def parse_args():
         required=True,
         help="the mgf file containing target node spectra",
     )
+    parser.add_argument(
+        "--threshold_modified_cosine_similarity",
+        default=0.5,
+        type=float,
+        required=True,
+        help="the threshold for modified cosine similarity to filter the results",
+    )
+    parser.add_argument(
+        "--top_k",
+        type=int,
+        required=True,
+        default=10,
+        help="the top k candidates for annotation",
+    )
     return parser.parse_args()
 
 
@@ -199,13 +213,13 @@ def parse_prediction_spectrum(prediction_spectrum_file, energy_level):
 
 
 def process_smiles(args):
-    idx, smile, output_file, container_idx, target_node_id, all_target_spectra = args
+    idx, energy_level,tolerance, threshold_modified_cosine_similarity,smile, output_file, container_idx, target_node_id, all_target_spectra = args
     controller = controllers[container_idx]
 
     try:
         controller.predict(smile, output_file)
         prediction_ms, prediction_peaks = parse_prediction_spectrum(
-            output_file, args.energy_level
+            output_file, energy_level
         )
 
         if prediction_ms is None or not prediction_peaks:
@@ -216,9 +230,9 @@ def process_smiles(args):
             prediction_peaks,
             target_node_id,
             all_target_spectra,
-            args.tolerance,
+            tolerance,
         )
-        if score < args.threshold_modified_cosine_similarity:
+        if score < threshold_modified_cosine_similarity:
             return idx, np.nan
         else:
             return idx, score
@@ -227,10 +241,10 @@ def process_smiles(args):
         return idx, np.nan
 
 
-def process_file(file, file_type, all_target_spectra):
+def process_file(file, file_type, all_target_spectra, energy_level,tolerance, threshold_modified_cosine_similarity, topk):
     prefix = "not_unique" if file_type == "not_unique" else "unique"
     folder = (
-        f"tmp/Seednode_and_Targetnode_Morgan_Similarity_score_split_{prefix}_Top10/"
+        f"tmp/Seednode_and_Targetnode_Morgan_Similarity_score_split_{prefix}_Top{topk}/"
     )
 
     df = pd.read_csv(os.path.join(folder, file))
@@ -244,7 +258,7 @@ def process_file(file, file_type, all_target_spectra):
         output_file = f"tmp/cfmid_spectrum_results/{target_node_id}/{i}.txt"
         container_idx = i % NUM_CONTAINERS  # 简单轮询分配容器
         tasks.append(
-            (i, smile, output_file, container_idx, target_node_id, all_target_spectra)
+            (i, energy_level,tolerance, threshold_modified_cosine_similarity, smile, output_file, container_idx, target_node_id, all_target_spectra)
         )
 
     # 多进程并行
@@ -265,10 +279,10 @@ if __name__ == "__main__":
 
     # 读取not_unique和unique文件夹下的文件
     not_unique_files = os.listdir(
-        "tmp/Seednode_and_Targetnode_Morgan_Similarity_score_split_not_unique_Top10/"
+        f"tmp/Seednode_and_Targetnode_Morgan_Similarity_score_split_not_unique_Top{args.top_k}/"
     )
     unique_files = os.listdir(
-        "tmp/Seednode_and_Targetnode_Morgan_Similarity_score_split_unique_Top10/"
+        f"tmp/Seednode_and_Targetnode_Morgan_Similarity_score_split_unique_Top{args.top_k}/"
     )
 
     os.makedirs("tmp/cfmid_score_results", exist_ok=True)
@@ -290,11 +304,11 @@ if __name__ == "__main__":
 
     for file in tqdm(not_unique_files, desc="Processing not_unique files"):
         if file.endswith(".csv"):
-            process_file(file, "not_unique", all_target_spectra)
+            process_file(file, "not_unique", all_target_spectra, args.energy_level, args.tolerance, args.threshold_modified_cosine_similarity,args.top_k)
 
     for file in tqdm(unique_files, desc="Processing unique files"):
         if file.endswith(".csv"):
-            process_file(file, "unique", all_target_spectra)
+            process_file(file, "unique", all_target_spectra, args.energy_level,args.tolerance, args.threshold_modified_cosine_similarity, args.top_k)
 
     for c in controllers:
         c.stop_container()
