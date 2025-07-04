@@ -95,7 +95,25 @@ def merge_cfmid_results(tmp_folder, output_file):
         # 提取ID并添加为第一列
         id_value = file.split(".")[0]  # 假设文件名格式为 ID.csv
         df.insert(0, "ID", id_value)  # 插入到第一列
-        df_list.append(df)
+
+        df.rename(columns={"Seednode": "Seed Node"}, inplace=True)
+        df.rename(columns={"CFM-ID_score": "Score"}, inplace=True)
+        df.rename(columns={"MW": "MonoIsotopic Weight"}, inplace=True)
+
+        columns_to_keep = [
+            "ID",
+            "Seed Node",
+            "CID",
+            "MonoIsotopic Weight",
+            "SMILES",
+            "Formula",
+            "Score",
+        ]
+        df_final = df[columns_to_keep].copy()
+
+        df_final.sort_values(by="Score", ascending=False, inplace=True)
+
+        df_list.append(df_final)
 
     # 合并所有DataFrame
     final_df = pd.concat(df_list, ignore_index=True)

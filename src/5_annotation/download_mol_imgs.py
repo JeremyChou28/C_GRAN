@@ -10,7 +10,7 @@ def parse_args():
     parser = argparse.ArgumentParser(description="Molecular Networking Annotation.")
     parser.add_argument(
         "--annotation_result_file",
-        default="final_annotation_results.csv",
+        default="final_naive_annotation_results.csv",
         type=str,
         required=True,
         help="the annotation result file containing ID, SMILES, and other information",
@@ -74,13 +74,24 @@ if __name__ == "__main__":
         id_ = row.get("ID", "unknown_id")
         mol_img_filename = args.structure_image_folder + f"{id_}.{args.format}"
         save_image(mol, mol_img_filename, size=args.size, fmt=args.format)
-        
+
         structure_paths.append(mol_img_filename)
-        
+
     # 生成最终输出文件
     annotation_results["Structure"] = structure_paths
     # 重新排列
-    columns_order = ["ID", "Seed Node", "Structure", "CID", "MonoIsotopic Weight", "SMILES", "Formula", "Score"]
-    annotation_results = annotation_results[columns_order]   
-    output_file = "final_annotation_results_with_structures.csv"
-    annotation_results.to_csv(output_file, index=False)
+    columns_order = [
+        "ID",
+        "Seed Node",
+        "Structure",
+        "CID",
+        "MonoIsotopic Weight",
+        "SMILES",
+        "Formula",
+        "Score",
+    ]
+    annotation_results = annotation_results[columns_order]
+    final_output_file = args.annotation_result_file.replace(
+        ".csv", f"_with_structures.csv"
+    )
+    annotation_results.to_csv(args.final_output_file, index=False)

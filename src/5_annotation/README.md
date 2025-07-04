@@ -45,5 +45,5 @@ python run_iterative_annotation.py --molecular_network_file ./test_files/source_
 Finally, you could download the molecular structure images as follows:
 
 ```sh
-python download_mol_imgs.py --annotation_result_file final_annotation_results.csv --structure_image_folder mol_imgs/
+python download_mol_imgs.py --annotation_result_file final_naive_annotation_results.csv --structure_image_folder naive_mol_imgs/
 ```

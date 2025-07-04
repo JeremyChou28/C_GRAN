@@ -1,10 +1,12 @@
 src/1_calculate_correlation/correlation_results.csv
-src/5_annotation/final_annotation_results.csv
 src/5_annotation/final_naive_annotation_results.csv
-src/5_annotation/final_annotation_results_with_structures.csv
+src/5_annotation/final_cfmid_annotation_results.csv
+src/5_annotation/final_naive_annotation_results_with_structures.csv
+src/5_annotation/final_cfmid_annotation_results_with_structures.csv
 tmp/
 candidates/
 pubchem_database.pk
 archive/
-mol_imgs/
+cfmid_mol_imgs/
 naive_mol_imgs/
+
