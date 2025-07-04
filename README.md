@@ -103,9 +103,9 @@ cd src/5_annotation
 
 python preprocess.py --molecular_network_file ./test_files/source_target_cor_edit.csv --seednode_file ./test_files/seednode.csv --candidates_folder ../4_search_candidates/candidates --top_k 10
 
-python cfmid_prediction.py --num_containers 10 --tolerance 0.1 --energy_level 0 --ion_mode positive --spectrum_file ./test_files/compounds_spectrum.mgf
+python cfmid_prediction.py --num_containers 10 --tolerance 0.1 --energy_level 0 --ion_mode positive --spectrum_file ./test_files/compounds_spectrum.mgf --threshold_modified_cosine_similarity 0.7
 
-python postprocess.py --seednode_file ./test_files/seednode.csv --threshold_modified_cosine_similarity 0.7
+python postprocess.py --seednode_file ./test_files/seednode.csv 
 ```
 
 or you run the iterative annotation as follows:
