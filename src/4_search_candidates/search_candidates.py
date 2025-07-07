@@ -36,7 +36,7 @@ def parse_args():
     )
     # offline parameters
     parser.add_argument(
-        "--molecular_network_file",
+        "--edited_molecular_network_file",
         default="source_target_cor_edit.csv",
         type=str,
         required=True,
@@ -252,7 +252,7 @@ if __name__ == "__main__":
         os.makedirs(tmp_result_path)
 
     # 生成唯一 ID 和分子量的 CSV 文件
-    molecular_network_df = pd.read_csv(args.molecular_network_file)
+    molecular_network_df = pd.read_csv(args.edited_molecular_network_file)
     unique_ids_df = generate_ID_MW_file(
         molecular_network_df, os.path.join(tmp_result_path, "unique_ID_MW.csv")
     )

@@ -18,32 +18,32 @@ warnings.filterwarnings("ignore")
 def parse_args():
     parser = argparse.ArgumentParser()
     parser.add_argument(
-        "--input-data",
+        "--input_data",
         default="test.txt",
         type=str,
         required=True,
         help="input data path, TXT file",
     )
     parser.add_argument(
-        "--compounds-num", type=int, required=True, help="number of compounds"
+        "--compounds_num", type=int, required=True, help="number of compounds"
     )
     parser.add_argument(
-        "--samples-num", type=int, required=True, help="number of samples"
+        "--samples_num", type=int, required=True, help="number of samples"
     )
     parser.add_argument(
-        "--correlation-result-filename",
+        "--correlation_result_filename",
         default="correlation_results.csv",
         type=str,
         help="the calculated correlation result filename, which will be saved as a CSV file",
     )
     parser.add_argument(
-        "--n-jobs",
+        "--n_jobs",
         default=1,
         type=int,
         help="number of jobs",
     )
     parser.add_argument(
-        "--run-name",
+        "--run_name",
         default="test",
         type=str,
         help="run name for output pickle filename",

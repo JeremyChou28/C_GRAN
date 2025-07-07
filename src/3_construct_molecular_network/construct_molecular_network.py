@@ -16,7 +16,7 @@ def parse_args():
         help="input seednode file",
     )
     parser.add_argument(
-        "--threshold",
+        "--correlation_threshold",
         type=float,
         default=0.7,
         required=True,
@@ -122,7 +122,7 @@ if __name__ == "__main__":
     # 编辑分子网络
     output_filename = tmp_result_path + "source_target_cor_edit.csv"
     edit_molecular_network(
-        source_target_cor_df, output_filename, args.threshold, args.RT_threshold
+        source_target_cor_df, output_filename, args.correlation_threshold, args.RT_threshold
     )
 
     print("Spend time: ", time.time() - start_time)

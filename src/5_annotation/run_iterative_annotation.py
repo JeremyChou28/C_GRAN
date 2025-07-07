@@ -55,7 +55,7 @@ def parse_args():
         help="the ion mode of the spectrum data predicted by CFM-ID, positive or negative",
     )
     parser.add_argument(
-        "--threshold_modified_cosine_similarity",
+        "--modified_cosine_similarity_threshold",
         default=0.5,
         type=float,
         required=True,
@@ -153,7 +153,6 @@ if __name__ == "__main__":
     max_rounds = args.max_iterations  # 防止死循环，你也可以去掉
     round_num = 0
 
-    """
     while round_num < max_rounds:
         round_num += 1
         print(f"\n🔁 Round {round_num} running...")
@@ -190,8 +189,8 @@ if __name__ == "__main__":
                 args.spectrum_file,
                 "--top_k",
                 str(args.top_k),
-                "--threshold_modified_cosine_similarity",
-                str(args.threshold_modified_cosine_similarity),
+                "--modified_cosine_similarity_threshold",
+                str(args.modified_cosine_similarity_threshold),
             ],
             check=True,
         )
@@ -222,7 +221,6 @@ if __name__ == "__main__":
             break
     else:
         print("⚠️ 达到最大循环次数，仍未完成。")
-    """
         
     # 输出最终的注释结果
     merge_cfmid_results(

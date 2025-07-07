@@ -1,4 +1,5 @@
 src/1_calculate_correlation/correlation_results.csv
+src/1_calculate_correlation/test_files/CD_sediment_pos.txt
 src/5_annotation/final_naive_annotation_results.csv
 src/5_annotation/final_cfmid_annotation_results.csv
 src/5_annotation/final_naive_annotation_results_with_structures.csv

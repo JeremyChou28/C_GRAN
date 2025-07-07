@@ -25,7 +25,7 @@ def parse_args():
         help="the candidates folder to save the search results",
     )
     parser.add_argument(
-        "--threshold_tanimoto_similarity",
+        "--tanimoto_similarity_threshold",
         default=0.5,
         type=float,
         required=True,
@@ -140,8 +140,8 @@ if __name__ == "__main__":
                 args.molecular_network_file,
                 "--seednode_file",
                 seednode_file,
-                "--threshold_tanimoto_similarity",
-                str(args.threshold_tanimoto_similarity),
+                "--tanimoto_similarity_threshold",
+                str(args.tanimoto_similarity_threshold),
                 "--top_k",
                 str(args.top_k),
                 "--round",

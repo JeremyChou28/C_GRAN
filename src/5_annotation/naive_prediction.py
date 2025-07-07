@@ -25,7 +25,7 @@ def parse_args():
         help="the original seednode file containing ID and SMILES",
     )
     parser.add_argument(
-        "--threshold_tanimoto_similarity",
+        "--tanimoto_similarity_threshold",
         default=0.5,
         type=float,
         required=True,
@@ -51,7 +51,7 @@ def pick_cycle_annotation(
     unique_folder,
     not_unique_folder,
     naive_prediction_folder,
-    threshold_tanimoto_similarity,
+    tanimoto_similarity_threshold,
 ):
     # 初始化结果列表
     result_rows = []
@@ -70,7 +70,7 @@ def pick_cycle_annotation(
         if "score" in df.columns:
             max_score = df["score"].max()
             smiles = df.loc[df["score"] == max_score, "SMILES"].values[0]
-            if max_score < threshold_tanimoto_similarity:
+            if max_score < tanimoto_similarity_threshold:
                 continue
         else:
             continue
@@ -86,7 +86,7 @@ def pick_cycle_annotation(
         if "weighted_score" in df.columns:
             max_score = df["weighted_score"].max()
             smiles = df.loc[df["weighted_score"] == max_score, "SMILES"].values[0]
-            if max_score < threshold_tanimoto_similarity:
+            if max_score < tanimoto_similarity_threshold:
                 continue
         else:
             continue
@@ -111,7 +111,7 @@ def pick_cycle_annotation(
 if __name__ == "__main__":
     args = parse_args()
     seednode_file = args.seednode_file
-    threshold_tanimoto_similarity = args.threshold_tanimoto_similarity
+    tanimoto_similarity_threshold = args.tanimoto_similarity_threshold
 
     # 读取 all_nodes 集合
     molecular_network_df = pd.read_csv(args.molecular_network_file)
@@ -133,7 +133,7 @@ if __name__ == "__main__":
         unique_folder,
         not_unique_folder,
         naive_prediction_folder,
-        threshold_tanimoto_similarity,
+        tanimoto_similarity_threshold,
     )
 
     # 生成下一轮的seednode file

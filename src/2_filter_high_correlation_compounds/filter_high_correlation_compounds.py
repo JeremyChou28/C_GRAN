@@ -18,7 +18,7 @@ def parse_args():
         help="input seednode file",
     )
     parser.add_argument(
-        "--threshold",
+        "--correlation_threshold",
         type=float,
         default=0.7,
         required=True,
@@ -96,7 +96,7 @@ if __name__ == "__main__":
     # 生成高相关性节点
     high_correlated_nodes_filename = tmp_result_path + "high_correlated_nodes.csv"
     generate_high_correlated_nodes(
-        filtered_df, high_correlated_nodes_filename, args.threshold
+        filtered_df, high_correlated_nodes_filename, args.correlation_threshold
     )
 
     print("Spend time: ", time.time() - start_time)
