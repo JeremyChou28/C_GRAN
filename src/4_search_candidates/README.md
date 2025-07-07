@@ -10,7 +10,7 @@ or you could download our prepared pubchem database from the [google drive](http
 
 then, run this script for searching candidates:
 ```sh
-python search_candidates.py --molecular_network_file test_files/source_target_cor_edit.csv --pubchem_database_path ./pubchem_database.pk --candidates_folder ./candidates/ --ppm_threshold 2 --is_filter_element --element_set 'C,H,O,N,P,S,F,Cl,Br,I'
+python search_candidates.py --edited_molecular_network_file test_files/source_target_cor_edit.csv --pubchem_database_path ./pubchem_database.pk --candidates_folder ./candidates/ --ppm_threshold 2 --is_filter_element --element_set 'C,H,O,N,P,S,F,Cl,Br,I'
 ```
 
 - `edited_molecular_network_file`: Path to the edited molecular network CSV file with Source, Target, correlation, RT, etc from Step 3.

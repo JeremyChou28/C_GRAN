@@ -7,12 +7,12 @@ you could run the example step by step as follows:
 ```sh
 cd src/5_annotation
 
-python preprocess.py --molecular_network_file ./test_files/source_target_cor_edit.csv --seednode_file ./test_files/seednode.csv --candidates_folder ../4_search_candidates/candidates --top_k 10
+python preprocess.py --edited_molecular_network_file ./test_files/source_target_cor_edit.csv --seednode_file ./test_files/seednode.csv --candidates_folder ../4_search_candidates/candidates --top_k 10
 
-python naive_prediction.py --molecular_network_file ./test_files/source_target_cor_edit.csv --seednode_file ./test_files/seednode.csv --tanimoto_similarity_threshold 0.5
+python naive_prediction.py --edited_molecular_network_file ./test_files/source_target_cor_edit.csv --seednode_file ./test_files/seednode.csv --tanimoto_similarity_threshold 0.5
 ```
 
-- `molecular_network_file`: Path to the edited molecular network CSV file with Source, Target, correlation, RT, etc from Step 3.
+- `edited_molecular_network_file`: Path to the edited molecular network CSV file with Source, Target, correlation, RT, etc from Step 3.
 
 - `seednode_file`: Path to the seed node CSV file. This file should contain a list of initial compounds (including columns such as ID and SMILES) to be used for annotation.
 
@@ -27,7 +27,7 @@ or you run the iterative annotation as follows:
 ```sh
 cd src/5_annotation
 
-python run_naive_iterative_annotation.py --molecular_network_file ./test_files/source_target_cor_edit.csv --seednode_file ./test_files/seednode.csv --candidates_folder ../4_search_candidates/candidates --tanimoto_similarity_threshold 0.5 --max_iterations 100 --top_k 10
+python run_naive_iterative_annotation.py --edited_molecular_network_file ./test_files/source_target_cor_edit.csv --seednode_file ./test_files/seednode.csv --candidates_folder ../4_search_candidates/candidates --tanimoto_similarity_threshold 0.5 --max_iterations 100 --top_k 10
 ```
 
 - `max_iterations`: Maximum number of annotation rounds during the iterative annotation process.
@@ -39,7 +39,7 @@ First, you should prepare the [CFM-ID](https://hub.docker.com/r/wishartlab/cfmid
 ```sh
 cd src/5_annotation
 
-python preprocess.py --molecular_network_file ./test_files/source_target_cor_edit.csv --seednode_file ./test_files/seednode.csv --candidates_folder ../4_search_candidates/candidates --top_k 10
+python preprocess.py --edited_molecular_network_file ./test_files/source_target_cor_edit.csv --seednode_file ./test_files/seednode.csv --candidates_folder ../4_search_candidates/candidates --top_k 10
 
 python cfmid_prediction.py --num_containers 10 --tolerance 0.1 --energy_level 0 --ion_mode positive --spectrum_file ./test_files/compounds_spectrum.mgf --modified_cosine_similarity_threshold 0.7
 
@@ -63,7 +63,7 @@ or you run the iterative annotation as follows:
 ```sh
 cd src/5_annotation
 
-python run_iterative_annotation.py --molecular_network_file ./test_files/source_target_cor_edit.csv --seednode_file ./test_files/seednode.csv --candidates_folder ../4_search_candidates/candidates --num_containers 10 --tolerance 0.1 --energy_level 0 --ion_mode positive --modified_cosine_similarity_threshold 0.5 --spectrum_file ./test_files/compounds_spectrum.mgf --max_iterations 100 --top_k 10
+python run_iterative_annotation.py --edited_molecular_network_file ./test_files/source_target_cor_edit.csv --seednode_file ./test_files/seednode.csv --candidates_folder ../4_search_candidates/candidates --num_containers 10 --tolerance 0.1 --energy_level 0 --ion_mode positive --modified_cosine_similarity_threshold 0.5 --spectrum_file ./test_files/compounds_spectrum.mgf --max_iterations 100 --top_k 10
 ```
 
 - `max_iterations`: Maximum number of annotation rounds during the iterative annotation process.
