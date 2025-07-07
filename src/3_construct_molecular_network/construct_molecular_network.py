@@ -9,7 +9,7 @@ def parse_args():
     parser = argparse.ArgumentParser(description="Construct molecular network.")
     # online parameters
     parser.add_argument(
-        "--source_target_file",
+        "--molecular_network_file",
         default="source_target.csv",
         type=str,
         required=True,
@@ -108,7 +108,7 @@ if __name__ == "__main__":
         os.makedirs(tmp_result_path)
 
     # 读取分子网络source node和target node
-    source_target_df = pd.read_csv(args.source_target_file)
+    source_target_df = pd.read_csv(args.molecular_network_file)
 
     # 读取相关性数据
     correlation_df = pd.read_csv(args.correlation_file)

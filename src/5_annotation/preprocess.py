@@ -11,7 +11,7 @@ from rdkit.Chem import rdMolDescriptors, DataStructs
 def parse_args():
     parser = argparse.ArgumentParser(description="Molecular Networking Annotation.")
     parser.add_argument(
-        "--molecular_network_file",
+        "--edited_molecular_network_file",
         default="source_target_cor_edit.csv",
         type=str,
         required=True,
@@ -335,7 +335,7 @@ if __name__ == "__main__":
         os.makedirs(tmp_result_path)
 
     # 获取seed node和target node
-    molecular_network_df = pd.read_csv(args.molecular_network_file)
+    molecular_network_df = pd.read_csv(args.edited_molecular_network_file)
     seednode_df = pd.read_csv(args.seednode_file)
     edges_df = generate_seednode_and_targetnode(
         molecular_network_df,

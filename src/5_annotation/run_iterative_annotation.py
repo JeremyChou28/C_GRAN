@@ -7,7 +7,7 @@ import pandas as pd
 def parse_args():
     parser = argparse.ArgumentParser(description="Molecular Networking Annotation.")
     parser.add_argument(
-        "--molecular_network_file",
+        "--edited_molecular_network_file",
         default="source_target_cor_edit.csv",
         type=str,
         required=True,
@@ -144,7 +144,7 @@ if __name__ == "__main__":
     seednode_file = args.seednode_file
 
     # 读取 all_nodes 集合
-    molecular_network_df = pd.read_csv(args.molecular_network_file)
+    molecular_network_df = pd.read_csv(args.edited_molecular_network_file)
     source_nodes = molecular_network_df["source"].tolist()
     target_nodes = molecular_network_df["target"].tolist()
     all_nodes = set(source_nodes + target_nodes)
@@ -162,8 +162,8 @@ if __name__ == "__main__":
             [
                 "python",
                 "preprocess.py",
-                "--molecular_network_file",
-                args.molecular_network_file,
+                "--edited_molecular_network_file",
+                args.edited_molecular_network_file,
                 "--seednode_file",
                 seednode_file,
                 "--candidates_folder",

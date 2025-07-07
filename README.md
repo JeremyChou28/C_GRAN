@@ -36,10 +36,10 @@ pip install -r requirements.txt
 ```sh
 cd src/1_calculate_correlation
 
-python calculate_correlation.py --input_data test_files/test.txt --compounds_num 14 --samples_num 98 --correlation_result_filename correlation_results.csv
+python calculate_correlation.py --intensity_file test_files/test.txt --compounds_num 14 --samples_num 98 --correlation_result_filename correlation_results.csv
 ```
 
-- `input_data`: Path to the input data file. 
+- `intensity_file`: Path to the input data file. 
 
 - `compounds_num`: Number of compounds in the dataset (i.e., number of rows in the input file).
 
@@ -67,10 +67,10 @@ python filter_high_correlation_compounds.py --correlation_file ../1_calculate_co
 ```sh
 cd src/3_construct_molecular_network
 
-python construct_molecular_network.py --source_target_file test_files/source_target.csv --correlation_file ../1_calculate_correlation/correlation_results.csv --correlation_threshold 0.7 --RT_threshold 0.01
+python construct_molecular_network.py --molecular_network_file test_files/source_target.csv --correlation_file ../1_calculate_correlation/correlation_results.csv --correlation_threshold 0.7 --RT_threshold 0.01
 ```
 
-- `source_target_file`: Path to the molecular network file (CSV), containing columns such as Source, Target, and retention time (RT).
+- `molecular_network_file`: Path to the molecular network file (CSV), containing columns such as Source, Target, and retention time (RT).
 
 - `correlation_file`: Path to the correlation_results from Step 1.
 
@@ -90,7 +90,7 @@ or you could download our prepared pubchem database from the [google drive](http
 
 then, run this script for searching candidates:
 ```sh
-python search_candidates.py --molecular_network_file test_files/source_target_cor_edit.csv --pubchem_database_path ./pubchem_database.pk --candidates_folder ./candidates/ --ppm_threshold 2 --is_filter_element --element_set 'C,H,O,N,P,S,F,Cl,Br,I'
+python search_candidates.py --edited_molecular_network_file test_files/source_target_cor_edit.csv --pubchem_database_path ./pubchem_database.pk --candidates_folder ./candidates/ --ppm_threshold 2 --is_filter_element --element_set 'C,H,O,N,P,S,F,Cl,Br,I'
 ```
 
 - `edited_molecular_network_file`: Path to the edited molecular network CSV file with Source, Target, correlation, RT, etc from Step 3.
@@ -114,12 +114,12 @@ you could run the example step by step as follows:
 ```sh
 cd src/5_annotation
 
-python preprocess.py --molecular_network_file ./test_files/source_target_cor_edit.csv --seednode_file ./test_files/seednode.csv --candidates_folder ../4_search_candidates/candidates --top_k 10
+python preprocess.py --edited_molecular_network_file ./test_files/source_target_cor_edit.csv --seednode_file ./test_files/seednode.csv --candidates_folder ../4_search_candidates/candidates --top_k 10
 
-python naive_prediction.py --molecular_network_file ./test_files/source_target_cor_edit.csv --seednode_file ./test_files/seednode.csv --tanimoto_similarity_threshold 0.5
+python naive_prediction.py --edited_molecular_network_file ./test_files/source_target_cor_edit.csv --seednode_file ./test_files/seednode.csv --tanimoto_similarity_threshold 0.5
 ```
 
-- `molecular_network_file`: Path to the edited molecular network CSV file with Source, Target, correlation, RT, etc from Step 3.
+- `edited_molecular_network_file`: Path to the edited molecular network CSV file with Source, Target, correlation, RT, etc from Step 3.
 
 - `seednode_file`: Path to the seed node CSV file. This file should contain a list of initial compounds (including columns such as ID and SMILES) to be used for annotation.
 
@@ -134,7 +134,7 @@ or you run the iterative annotation as follows:
 ```sh
 cd src/5_annotation
 
-python run_naive_iterative_annotation.py --molecular_network_file ./test_files/source_target_cor_edit.csv --seednode_file ./test_files/seednode.csv --candidates_folder ../4_search_candidates/candidates --tanimoto_similarity_threshold 0.5 --max_iterations 100 --top_k 10
+python run_naive_iterative_annotation.py --edited_molecular_network_file ./test_files/source_target_cor_edit.csv --seednode_file ./test_files/seednode.csv --candidates_folder ../4_search_candidates/candidates --tanimoto_similarity_threshold 0.5 --max_iterations 100 --top_k 10
 ```
 
 - `max_iterations`: Maximum number of annotation rounds during the iterative annotation process.
@@ -146,7 +146,7 @@ First, you should prepare the [CFM-ID](https://hub.docker.com/r/wishartlab/cfmid
 ```sh
 cd src/5_annotation
 
-python preprocess.py --molecular_network_file ./test_files/source_target_cor_edit.csv --seednode_file ./test_files/seednode.csv --candidates_folder ../4_search_candidates/candidates --top_k 10
+python preprocess.py --edited_molecular_network_file ./test_files/source_target_cor_edit.csv --seednode_file ./test_files/seednode.csv --candidates_folder ../4_search_candidates/candidates --top_k 10
 
 python cfmid_prediction.py --num_containers 10 --tolerance 0.1 --energy_level 0 --ion_mode positive --spectrum_file ./test_files/compounds_spectrum.mgf --modified_cosine_similarity_threshold 0.7
 

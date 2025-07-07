@@ -18,7 +18,7 @@ warnings.filterwarnings("ignore")
 def parse_args():
     parser = argparse.ArgumentParser()
     parser.add_argument(
-        "--input_data",
+        "--intensity_file",
         default="test.txt",
         type=str,
         required=True,
@@ -333,8 +333,8 @@ if __name__ == "__main__":
     start_time = time.time()
     args = parse_args()
 
-    print(f"Loading data {args.input_data}...")
-    df = pd.read_csv(args.input_data, sep="\t")
+    print(f"Loading data {args.intensity_file}...")
+    df = pd.read_csv(args.intensity_file, sep="\t")
 
     assert (
         df.shape[0] == args.compounds_num and df.shape[1] == args.samples_num

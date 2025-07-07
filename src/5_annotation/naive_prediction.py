@@ -11,7 +11,7 @@ from rdkit.Chem import rdMolDescriptors, DataStructs
 def parse_args():
     parser = argparse.ArgumentParser(description="Navie prediction.")
     parser.add_argument(
-        "--molecular_network_file",
+        "--edited_molecular_network_file",
         default="source_target_cor_edit.csv",
         type=str,
         required=True,
@@ -114,7 +114,7 @@ if __name__ == "__main__":
     tanimoto_similarity_threshold = args.tanimoto_similarity_threshold
 
     # 读取 all_nodes 集合
-    molecular_network_df = pd.read_csv(args.molecular_network_file)
+    molecular_network_df = pd.read_csv(args.edited_molecular_network_file)
     source_nodes = molecular_network_df["source"].tolist()
     target_nodes = molecular_network_df["target"].tolist()
     all_nodes = set(source_nodes + target_nodes)

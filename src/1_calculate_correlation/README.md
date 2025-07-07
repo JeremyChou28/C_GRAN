@@ -5,10 +5,10 @@ you could run the example as follows:
 ```sh
 cd src/1_calculate_correlation
 
-python calculate_correlation.py --input_data test_files/test.txt --compounds_num 14 --samples_num 98 --correlation_result_filename correlation_results.csv
+python calculate_correlation.py --intensity_file test_files/test.txt --compounds_num 14 --samples_num 98 --correlation_result_filename correlation_results.csv
 ```
 
-- `input_data`: Path to the input data file. 
+- `intensity_file`: Path to the input data file. 
 
 - `compounds_num`: Number of compounds in the dataset (i.e., number of rows in the input file).
 
