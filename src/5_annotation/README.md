@@ -34,7 +34,7 @@ python run_naive_iterative_annotation.py --molecular_network_file ./test_files/s
 
 ## Annotation with CFM-ID
 
-First, you should prepare the [CFMID](https://hub.docker.com/r/wishartlab/cfmid) environment, and then you could run the example step by step as follows:
+First, you should prepare the [CFM-ID](https://hub.docker.com/r/wishartlab/cfmid) environment, and then you could run the example step by step as follows:
 
 ```sh
 cd src/5_annotation

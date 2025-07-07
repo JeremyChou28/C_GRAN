@@ -107,7 +107,7 @@ python search_candidates.py --molecular_network_file test_files/source_target_co
 
 #### Step 5. Annotation
 
-##### 5.1 Naive annotation
+**5.1 Naive annotation**
 
 you could run the example step by step as follows:
 
@@ -139,9 +139,9 @@ python run_naive_iterative_annotation.py --molecular_network_file ./test_files/s
 
 - `max_iterations`: Maximum number of annotation rounds during the iterative annotation process.
 
-##### 5.2 Annotation with CFM-ID
+**5.2 Annotation with CFM-ID**
 
-First, you should prepare the [CFMID](https://hub.docker.com/r/wishartlab/cfmid) environment, and then you could run the example step by step as follows:
+First, you should prepare the [CFM-ID](https://hub.docker.com/r/wishartlab/cfmid) environment, and then you could run the example step by step as follows:
 
 ```sh
 cd src/5_annotation
