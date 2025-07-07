@@ -85,15 +85,28 @@ def parse_args():
     return parser.parse_args()
 
 
-def merge_cfmid_results(tmp_folder, output_file):
-    all_files = [f for f in os.listdir(tmp_folder) if f.endswith(".csv")]
+def merge_cfmid_results(cfmid_score_results_path, output_file, cfmid_seednodes_path):
+    id_to_round = {}
+    for file in os.listdir(cfmid_seednodes_path):
+        if file.startswith("annotation_with_cfmid_seednode_round") and file.endswith(".csv"):
+            round_num = int(file.replace("annotation_with_cfmid_seednode_round", "").replace(".csv", ""))
+            round_df = pd.read_csv(os.path.join(cfmid_seednodes_path, file))
+            if "ID" in round_df.columns:
+                for id_val in round_df["ID"].dropna().unique():
+                    id_to_round[str(id_val)] = round_num  # 保证 key 是字符串格式
+
+    all_files = [f for f in os.listdir(cfmid_score_results_path) if f.endswith(".csv")]
     df_list = []
 
     for file in all_files:
-        file_path = os.path.join(tmp_folder, file)
+        file_path = os.path.join(cfmid_score_results_path, file)
         df = pd.read_csv(file_path)
         # 提取ID并添加为第一列
         id_value = file.split(".")[0]  # 假设文件名格式为 ID.csv
+        # 判断id_value是否存在于 id_to_round 中
+        if id_value not in id_to_round:
+            continue
+
         df.insert(0, "ID", id_value)  # 插入到第一列
 
         df.rename(columns={"Seednode": "Seed Node"}, inplace=True)
@@ -112,6 +125,10 @@ def merge_cfmid_results(tmp_folder, output_file):
         df_final = df[columns_to_keep].copy()
 
         df_final.sort_values(by="Score", ascending=False, inplace=True)
+
+        # 添加 Round 列作为第一列
+        round_value = id_to_round.get(str(id_value), '')
+        df_final.insert(0, "Round", round_value)
 
         df_list.append(df_final)
 
@@ -136,6 +153,7 @@ if __name__ == "__main__":
     max_rounds = args.max_iterations  # 防止死循环，你也可以去掉
     round_num = 0
 
+    """
     while round_num < max_rounds:
         round_num += 1
         print(f"\n🔁 Round {round_num} running...")
@@ -183,11 +201,13 @@ if __name__ == "__main__":
                 "postprocess.py",
                 "--seednode_file",
                 seednode_file,
+                "--round",
+                str(round_num),
             ],
             check=True,
         )
 
-        seednode_file = "tmp/seednode.csv"
+        seednode_file = f"tmp/annotation_with_cfmid_seednode_round{round_num}.csv"
         # 读取 seednode 文件，检查 ID 集合
         try:
             seednode_df = pd.read_csv(seednode_file)
@@ -202,8 +222,9 @@ if __name__ == "__main__":
             break
     else:
         print("⚠️ 达到最大循环次数，仍未完成。")
-
+    """
+        
     # 输出最终的注释结果
     merge_cfmid_results(
-        tmp_folder="tmp/cfmid_score_results", output_file="final_annotation_results.csv"
+        cfmid_score_results_path="tmp/cfmid_score_results/", output_file="final_cfmid_annotation_results.csv", cfmid_seednodes_path="tmp/"
     )

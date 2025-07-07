@@ -48,36 +48,53 @@ def parse_args():
     return parser.parse_args()
 
 
-def merge_naive_results(tmp_folder, output_file):
-    all_files = [f for f in os.listdir(tmp_folder) if f.endswith(".csv")]
+def merge_naive_results(naive_prediction_results_path, output_file, naive_seednodes_path):
+    all_files = [f for f in os.listdir(naive_prediction_results_path) if f.endswith(".csv")]
     df_list = []
 
+    # Step 1: 构建 ID -> Round 映射
+    id_to_round = {}
+    for file in os.listdir(naive_seednodes_path):
+        if file.startswith("naive_annotation_seednode_round") and file.endswith(".csv"):
+            round_num = int(file.replace("naive_annotation_seednode_round", "").replace(".csv", ""))
+            round_df = pd.read_csv(os.path.join(naive_seednodes_path, file))
+            if "ID" in round_df.columns:
+                for id_val in round_df["ID"].dropna().unique():
+                    id_to_round[str(id_val)] = round_num  # 保证 key 是字符串格式
+
+    # Step 2: 合并每个结果文件
     for file in all_files:
-        file_path = os.path.join(tmp_folder, file)
+        file_path = os.path.join(naive_prediction_results_path, file)
         df = pd.read_csv(file_path)
 
-        # 提取 ID（文件名去掉 .csv）
+        # 当前文件的 ID（由文件名去除 .csv 得到）
         id_value = os.path.splitext(file)[0]
 
+        # 标准化列名
         df.rename(columns={"Seednode": "Seed Node"}, inplace=True)
         df.rename(columns={"MW": "MonoIsotopic Weight"}, inplace=True)
 
+        # 标准化 Score 列
         if "weighted_score" in df.columns:
             df['score'] = df['weighted_score']
         df.rename(columns={"score": "Score"}, inplace=True)
-        
-        # 保留并重排你需要的列
+
+        # 保留并排列需要的列
         df = df[["Seed Node", "CID", "MonoIsotopic Weight", "SMILES", "Formula", "Score"]]
-        df.insert(0, "ID", id_value)  # 将 ID 插入第一列
+        df.insert(0, "ID", id_value)  # 插入 ID 列
         df["CID"] = "https://pubchem.ncbi.nlm.nih.gov/compound/" + df["CID"].astype(str)
         df['Seed Node'] = df['Seed Node'].apply(lambda x: '' if pd.isna(x) else str(int(x)))
 
+        # 添加 Round 列作为第一列
+        round_value = id_to_round.get(id_value, '')
+        df.insert(0, "Round", [round_value] * len(df))
+
         df_list.append(df)
 
-    # 合并所有DataFrame
+    # Step 3: 合并所有 DataFrame
     final_df = pd.concat(df_list, ignore_index=True)
     final_df.to_csv(output_file, index=False)
-    print(f"All results merged into {output_file}")
+    print(f"✅ All results merged into {output_file}")
 
 
 if __name__ == "__main__":
@@ -94,7 +111,7 @@ if __name__ == "__main__":
     # 循环直到 seednode 中包含所有节点
     max_rounds = args.max_iterations  # 防止死循环，你也可以去掉
     round_num = 0
-
+    
     while round_num < max_rounds:
         round_num += 1
         print(f"\n🔁 Round {round_num} running...")
@@ -127,11 +144,13 @@ if __name__ == "__main__":
                 str(args.threshold_tanimoto_similarity),
                 "--top_k",
                 str(args.top_k),
+                "--round",
+                str(round_num),
             ],
             check=True,
         )
 
-        seednode_file = "tmp/naive_cycle_seednode.csv"
+        seednode_file = f"tmp/naive_annotation_seednode_round{round_num}.csv"
         # 读取 seednode 文件，检查 ID 集合
         try:
             seednode_df = pd.read_csv(seednode_file)
@@ -146,9 +165,10 @@ if __name__ == "__main__":
             break
     else:
         print("⚠️ 达到最大循环次数，仍未完成。")
-
+    
     # 输出最终的注释结果
     merge_naive_results(
-        tmp_folder="tmp/naive_prediction_results",
+        naive_prediction_results_path="tmp/naive_prediction_results/",
         output_file="final_naive_annotation_results.csv",
+        naive_seednodes_path="tmp/"
     )

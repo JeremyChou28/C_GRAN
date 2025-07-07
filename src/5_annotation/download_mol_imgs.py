@@ -81,6 +81,7 @@ if __name__ == "__main__":
     annotation_results["Structure"] = structure_paths
     # 重新排列
     columns_order = [
+        "Round",
         "ID",
         "Seed Node",
         "Structure",
@@ -94,4 +95,4 @@ if __name__ == "__main__":
     final_output_file = args.annotation_result_file.replace(
         ".csv", f"_with_structures.csv"
     )
-    annotation_results.to_csv(args.final_output_file, index=False)
+    annotation_results.to_csv(final_output_file, index=False)

@@ -38,6 +38,12 @@ def parse_args():
         default=10,
         help="the top k candidates for annotation",
     )
+    parser.add_argument(
+        "--round",
+        type=int,
+        default=0,
+        help="the round of annotation, used to name the output file",
+    )
     return parser.parse_args()
 
 
@@ -54,17 +60,9 @@ def pick_cycle_annotation(
     unique_files = [f for f in os.listdir(unique_folder) if f.endswith(".csv")]
     not_unique_files = [f for f in os.listdir(not_unique_folder) if f.endswith(".csv")]
 
-    # 将unique_files和not_unique_files copy到naive_prediction_folder
-    for file in unique_files + not_unique_files:
-        src_path = os.path.join(
-            unique_folder if file in unique_files else not_unique_folder, file
-        )
-        dest_path = os.path.join(naive_prediction_folder, file)
-        shutil.copy(src_path, dest_path)
-
     # 遍历unique_files
     for file in unique_files:
-        file_path = os.path.join(naive_prediction_folder, file)
+        file_path = os.path.join(unique_folder, file)
         df = pd.read_csv(file_path)
         # 从file中提取ID
         file_id = file.split(".csv")[0]
@@ -80,7 +78,7 @@ def pick_cycle_annotation(
 
     # 遍历not_unique_files
     for file in not_unique_files:
-        file_path = os.path.join(naive_prediction_folder, file)
+        file_path = os.path.join(not_unique_folder, file)
         df = pd.read_csv(file_path)
         # 从file中提取ID
         file_id = file.split(".csv")[0]
@@ -94,8 +92,19 @@ def pick_cycle_annotation(
             continue
         result_rows.append({"ID": file_id, "SMILES": smiles})
 
+
     # 将结果转换为DataFrame
     final_df = pd.DataFrame(result_rows)
+
+    # 将df中的ID列的文件copy到naive_prediction_folder
+    for index in final_df['ID'].tolist():
+        file_name = f"{index}.csv"
+        src_path = os.path.join(unique_folder, file_name)
+        if not os.path.exists(src_path):
+            src_path = os.path.join(not_unique_folder, file_name)
+        dest_path = os.path.join(naive_prediction_folder, file_name)
+        shutil.copy(src_path, dest_path)
+
     return final_df
 
 
@@ -132,4 +141,4 @@ if __name__ == "__main__":
     seednode_df = seednode_df[["ID", "SMILES"]]
     merged_df = pd.concat([seednode_df, final_df], ignore_index=True)
 
-    merged_df.to_csv("tmp/naive_cycle_seednode.csv", index=False)
+    merged_df.to_csv(f"tmp/naive_annotation_seednode_round{args.round}.csv", index=False)

@@ -14,6 +14,12 @@ def parse_args():
         required=True,
         help="the original seednode file containing ID and SMILES",
     )
+    parser.add_argument(
+        "--round",
+        type=int,
+        default=0,
+        help="the round of annotation, used to name the output file",
+    )
     return parser.parse_args()
 
 
@@ -125,4 +131,4 @@ if __name__ == "__main__":
     annotated_nodes_df = annotated_nodes_df[["ID", "SMILES"]]
     seednode_df = pd.read_csv(args.seednode_file)[["ID", "SMILES"]]
     merged_df = pd.concat([seednode_df, annotated_nodes_df], ignore_index=True)
-    merged_df.to_csv(tmp_result_path + "seednode.csv", index=False)
+    merged_df.to_csv(tmp_result_path + f"annotation_with_cfmid_seednode_round{args.round}.csv", index=False)
