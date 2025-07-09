@@ -92,16 +92,17 @@ def pick_cycle_annotation(
         result_rows.append({"ID": file_id, "SMILES": smiles})
 
     # 将结果转换为DataFrame
-    final_df = pd.DataFrame(result_rows)
+    final_df = pd.DataFrame(result_rows, columns=["ID", "SMILES"])
 
     # 将df中的ID列的文件copy到naive_prediction_folder
-    for index in final_df["ID"].tolist():
-        file_name = f"{index}.csv"
-        src_path = os.path.join(unique_folder, file_name)
-        if not os.path.exists(src_path):
-            src_path = os.path.join(not_unique_folder, file_name)
-        dest_path = os.path.join(naive_prediction_folder, file_name)
-        shutil.copy(src_path, dest_path)
+    if not final_df.empty:
+        for index in final_df["ID"].tolist():
+            file_name = f"{index}.csv"
+            src_path = os.path.join(unique_folder, file_name)
+            if not os.path.exists(src_path):
+                src_path = os.path.join(not_unique_folder, file_name)
+            dest_path = os.path.join(naive_prediction_folder, file_name)
+            shutil.copy(src_path, dest_path)
 
     return final_df
 
