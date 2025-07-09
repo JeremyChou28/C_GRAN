@@ -76,12 +76,12 @@ def pick_final_annotation(cfmid_prediction_folder, output_file):
         cols = ["ID"] + [col for col in final_df.columns if col != "ID"]
         final_df = final_df[cols]
         final_df.to_csv(output_file, index=False)
+        return final_df
+    else:
+        return None
 
 
-def filter_annotation(annotation_file, output_file):
-    # 读取CSV文件
-    df = pd.read_csv(annotation_file)
-
+def filter_annotation(df, output_file):
     # 初始化进度条
     with tqdm(total=2, desc="Filtering and selecting columns") as pbar:
         df.rename(columns={"Seednode": "Seed Node"}, inplace=True)
@@ -126,13 +126,19 @@ if __name__ == "__main__":
 
     cfmid_prediction_folder = tmp_result_path + "cfmid_score_results"
     annotation_result_file = tmp_result_path + "annotation_results.csv"
-    pick_final_annotation(cfmid_prediction_folder, annotation_result_file)
-
-    output_file = tmp_result_path + "annotation_results_filtered.csv"
-    annotated_nodes_df_filtered = filter_annotation(annotation_result_file, output_file)
+    annotation_result_df = pick_final_annotation(
+        cfmid_prediction_folder, annotation_result_file
+    )
+    if annotation_result_df is None:
+        annotated_nodes_df = pd.DataFrame(columns=["ID", "SMILES"])
+    else:
+        output_file = tmp_result_path + "annotation_results_filtered.csv"
+        annotated_nodes_df_filtered = filter_annotation(
+            annotation_result_df, output_file
+        )
+        annotated_nodes_df = annotated_nodes_df_filtered[["ID", "SMILES"]]
 
     # 生成下一轮的seednode file
-    annotated_nodes_df = annotated_nodes_df_filtered[["ID", "SMILES"]]
     seednode_df = pd.read_csv(args.seednode_file)[["ID", "SMILES"]]
     merged_df = pd.concat([seednode_df, annotated_nodes_df], ignore_index=True)
     merged_df.to_csv(
