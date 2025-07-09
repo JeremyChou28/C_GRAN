@@ -86,14 +86,18 @@ def parse_args():
     return parser.parse_args()
 
 
-def merge_cfmid_results(cfmid_score_results_path, output_file, cfmid_seednodes_path):
+def merge_cfmid_results(
+    cfmid_score_results_path, output_file, cfmid_seednodes_path, iterations
+):
     id_to_round = {}
-    round_num = int(
-        file.replace("annotation_with_cfmid_seednode_round", "").replace(".csv", "")
-    )
-    round_df = pd.read_csv(os.path.join(cfmid_seednodes_path, file))
-    for id_val in round_df["ID"].dropna().unique():
-        id_to_round[str(id_val)] = round_num  # 保证 key 是字符串格式
+    for round_num in range(1, iterations + 1):
+        file = f"annotation_with_cfmid_seednode_round{round_num}.csv"
+        file_path = os.path.join(cfmid_seednodes_path, file)
+        df = pd.read_csv(file_path)
+
+        for node_id in df["ID"]:
+            if str(node_id) not in id_to_round:
+                id_to_round[str(node_id)] = round_num
 
     all_files = [f for f in os.listdir(cfmid_score_results_path) if f.endswith(".csv")]
     df_list = []
@@ -143,9 +147,6 @@ if __name__ == "__main__":
     args = parse_args()
     # 初始的seednode file
     seednode_file = args.seednode_file
-    if not os.path.exists("tmp"):
-        os.makedirs("tmp")
-    shutil.copy(seednode_file, "tmp/annotation_with_cfmid_seednode_round0.csv")
 
     last_cycle_seednode_df = pd.read_csv(seednode_file)
     last_cycle_ids = set(last_cycle_seednode_df["ID"].astype(int).tolist())
@@ -241,6 +242,7 @@ if __name__ == "__main__":
     merge_cfmid_results(
         cfmid_score_results_path="tmp/cfmid_score_results/",
         output_file="final_cfmid_annotation_results.csv",
-        cfmid_seednodes_path=f"tmp/annotation_with_cfmid_seednode_round{round_num}.csv",
+        cfmid_seednodes_path=f"tmp/",
+        iterations=round_num,
     )
     print("Spend time: ", time.time() - start_time)

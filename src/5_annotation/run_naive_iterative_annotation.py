@@ -1,6 +1,5 @@
 import os
 import time
-import shutil
 import argparse
 import subprocess
 import pandas as pd
@@ -51,7 +50,7 @@ def parse_args():
 
 
 def merge_naive_results(
-    naive_prediction_results_path, output_file, naive_seednodes_path
+    naive_prediction_results_path, output_file, naive_seednodes_path, iterations
 ):
     all_files = [
         f for f in os.listdir(naive_prediction_results_path) if f.endswith(".csv")
@@ -60,12 +59,14 @@ def merge_naive_results(
 
     # Step 1: 构建 ID -> Round 映射
     id_to_round = {}
-    round_num = int(
-        file.replace("naive_annotation_seednode_round", "").replace(".csv", "")
-    )
-    round_df = pd.read_csv(naive_seednodes_path)
-    for id_val in round_df["ID"].dropna().unique():
-        id_to_round[str(id_val)] = round_num  # 保证 key 是字符串格式
+    for round_num in range(1, iterations + 1):
+        file = f"naive_annotation_seednode_round{round_num}.csv"
+        file_path = os.path.join(naive_seednodes_path, file)
+        df = pd.read_csv(file_path)
+
+        for node_id in df["ID"]:
+            if str(node_id) not in id_to_round:
+                id_to_round[str(node_id)] = round_num
 
     # Step 2: 合并每个结果文件
     for file in all_files:
@@ -111,9 +112,6 @@ if __name__ == "__main__":
     args = parse_args()
     # 初始的seednode file
     seednode_file = args.seednode_file
-    if not os.path.exists("tmp"):
-        os.makedirs("tmp")
-    shutil.copy(seednode_file, "tmp/naive_annotation_seednode_round0.csv")
 
     last_cycle_seednode_df = pd.read_csv(seednode_file)
     last_cycle_ids = set(last_cycle_seednode_df["ID"].astype(int).tolist())
@@ -125,7 +123,6 @@ if __name__ == "__main__":
 
     # 循环直到 seednode 中包含所有节点
     max_rounds = args.max_iterations  # 防止死循环，你也可以去掉
-    round_num = 0
 
     while round_num < max_rounds:
         round_time = time.time()
@@ -192,6 +189,7 @@ if __name__ == "__main__":
     merge_naive_results(
         naive_prediction_results_path="tmp/naive_prediction_results/",
         output_file="final_naive_annotation_results.csv",
-        naive_seednodes_path=f"tmp/naive_annotation_seednode_round{round_num}.csv",
+        naive_seednodes_path=f"tmp/",
+        iterations=round_num,
     )
     print("Spend time: ", time.time() - start_time)
