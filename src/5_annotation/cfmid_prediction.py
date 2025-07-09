@@ -1,6 +1,5 @@
 # # 对top10的smiles调用cfmid预测，并且利用matchms算出来modified cosine similarity写入文件
 import os
-import time
 import argparse
 import subprocess
 from multiprocessing import Pool, cpu_count
@@ -65,6 +64,12 @@ def parse_args():
         required=True,
         default=10,
         help="the top k candidates for annotation",
+    )
+    parser.add_argument(
+        "--round_num",
+        type=int,
+        default=0,
+        help="the round of annotation, used to name the output file",
     )
     return parser.parse_args()
 
@@ -213,7 +218,17 @@ def parse_prediction_spectrum(prediction_spectrum_file, energy_level):
 
 
 def process_smiles(args):
-    idx, energy_level,tolerance, modified_cosine_similarity_threshold,smile, output_file, container_idx, target_node_id, all_target_spectra = args
+    (
+        idx,
+        energy_level,
+        tolerance,
+        modified_cosine_similarity_threshold,
+        smile,
+        output_file,
+        container_idx,
+        target_node_id,
+        all_target_spectra,
+    ) = args
     controller = controllers[container_idx]
 
     try:
@@ -241,11 +256,18 @@ def process_smiles(args):
         return idx, np.nan
 
 
-def process_file(file, file_type, all_target_spectra, energy_level,tolerance, modified_cosine_similarity_threshold, topk):
+def process_file(
+    file,
+    file_type,
+    all_target_spectra,
+    energy_level,
+    tolerance,
+    modified_cosine_similarity_threshold,
+    topk,
+    round_num,
+):
     prefix = "not_unique" if file_type == "not_unique" else "unique"
-    folder = (
-        f"tmp/Seednode_and_Targetnode_Morgan_Similarity_score_split_{prefix}_Top{topk}/"
-    )
+    folder = f"tmp/Seednode_and_Targetnode_Morgan_Similarity_score_split_{prefix}_Top{topk}_Round{round_num}/"
 
     df = pd.read_csv(os.path.join(folder, file))
     smiles = df["SMILES"].values.tolist()
@@ -258,7 +280,17 @@ def process_file(file, file_type, all_target_spectra, energy_level,tolerance, mo
         output_file = f"tmp/cfmid_spectrum_results/{target_node_id}/{i}.txt"
         container_idx = i % NUM_CONTAINERS  # 简单轮询分配容器
         tasks.append(
-            (i, energy_level,tolerance, modified_cosine_similarity_threshold, smile, output_file, container_idx, target_node_id, all_target_spectra)
+            (
+                i,
+                energy_level,
+                tolerance,
+                modified_cosine_similarity_threshold,
+                smile,
+                output_file,
+                container_idx,
+                target_node_id,
+                all_target_spectra,
+            )
         )
 
     # 多进程并行
@@ -273,18 +305,15 @@ def process_file(file, file_type, all_target_spectra, energy_level,tolerance, mo
 
 
 if __name__ == "__main__":
-    start_time = time.time()
-
     args = parse_args()
 
     # 读取not_unique和unique文件夹下的文件
     not_unique_files = os.listdir(
-        f"tmp/Seednode_and_Targetnode_Morgan_Similarity_score_split_not_unique_Top{args.top_k}/"
+        f"tmp/Seednode_and_Targetnode_Morgan_Similarity_score_split_not_unique_Top{args.top_k}_Round{args.round_num}/"
     )
     unique_files = os.listdir(
-        f"tmp/Seednode_and_Targetnode_Morgan_Similarity_score_split_unique_Top{args.top_k}/"
+        f"tmp/Seednode_and_Targetnode_Morgan_Similarity_score_split_unique_Top{args.top_k}_Round{args.round_num}/"
     )
-
     os.makedirs("tmp/cfmid_score_results", exist_ok=True)
 
     # 读取目标节点的mgf文件并解析
@@ -304,13 +333,29 @@ if __name__ == "__main__":
 
     for file in tqdm(not_unique_files, desc="Processing not_unique files"):
         if file.endswith(".csv"):
-            process_file(file, "not_unique", all_target_spectra, args.energy_level, args.tolerance, args.modified_cosine_similarity_threshold,args.top_k)
+            process_file(
+                file,
+                "not_unique",
+                all_target_spectra,
+                args.energy_level,
+                args.tolerance,
+                args.modified_cosine_similarity_threshold,
+                args.top_k,
+                args.round_num,
+            )
 
     for file in tqdm(unique_files, desc="Processing unique files"):
         if file.endswith(".csv"):
-            process_file(file, "unique", all_target_spectra, args.energy_level,args.tolerance, args.modified_cosine_similarity_threshold, args.top_k)
+            process_file(
+                file,
+                "unique",
+                all_target_spectra,
+                args.energy_level,
+                args.tolerance,
+                args.modified_cosine_similarity_threshold,
+                args.top_k,
+                args.round_num,
+            )
 
     for c in controllers:
         c.stop_container()
-
-    print("Spend time: ", time.time() - start_time)

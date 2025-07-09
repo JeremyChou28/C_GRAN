@@ -1,5 +1,4 @@
 import os
-import time
 import shutil
 import argparse
 import pandas as pd
@@ -34,6 +33,12 @@ def parse_args():
         required=True,
         default=10,
         help="the top k candidates for annotation",
+    )
+    parser.add_argument(
+        "--round_num",
+        type=int,
+        default=0,
+        help="the round of annotation, used to name the output file",
     )
     return parser.parse_args()
 
@@ -194,12 +199,7 @@ def split_target_node(
             pbar.update(1)
 
 
-def pickle_topk_unique_seednode(unique_folder, topk):
-    output_folder = f"tmp/Seednode_and_Targetnode_Morgan_Similarity_score_split_unique_Top{topk}"  # 输出文件夹
-
-    # 创建输出文件夹
-    os.makedirs(output_folder, exist_ok=True)
-
+def pickle_topk_unique_seednode(unique_folder, output_folder, topk):
     # 获取所有以 "_xxx.csv" 命名的csv文件
     csv_files = [
         f for f in os.listdir(unique_folder) if f.endswith(".csv") and "_" in f
@@ -229,7 +229,7 @@ def pickle_topk_unique_seednode(unique_folder, topk):
                     threshold_score = sorted(scores, reverse=True)[topk - 1]
                     df_filtered = df[df["score"] >= threshold_score].copy()
 
-                output_path = output_folder+f"/{targetnode}.csv"
+                output_path = output_folder + f"/{targetnode}.csv"
 
                 df_filtered["Targetnode"] = targetnode
                 df_filtered["Seednode"] = seednode
@@ -242,12 +242,7 @@ def pickle_topk_unique_seednode(unique_folder, topk):
             pbar.update(1)
 
 
-def pickle_topk_not_unique(not_unique_csv, not_unique_folder, topk):
-    # 路径设置（请修改为你实际的路径）
-    output_folder = f"tmp/Seednode_and_Targetnode_Morgan_Similarity_score_split_not_unique_Top{topk}"  # 输出文件夹
-
-    os.makedirs(output_folder, exist_ok=True)
-
+def pickle_topk_not_unique(not_unique_csv, not_unique_folder, output_folder, topk):
     # 读取文件A，建立 (Targetnode, Seednode) → Correlation 映射
     df_corr = pd.read_csv(not_unique_csv)
 
@@ -327,9 +322,9 @@ def pickle_topk_not_unique(not_unique_csv, not_unique_folder, topk):
 
 
 if __name__ == "__main__":
-    start_time = time.time()
     args = parse_args()
-
+    round_num = args.round_num
+    topk = args.top_k
     tmp_result_path = "tmp/"
     if not os.path.exists(tmp_result_path):
         os.makedirs(tmp_result_path)
@@ -337,45 +332,65 @@ if __name__ == "__main__":
     # 获取seed node和target node
     molecular_network_df = pd.read_csv(args.edited_molecular_network_file)
     seednode_df = pd.read_csv(args.seednode_file)
-    edges_df = generate_seednode_and_targetnode(
+
+    seed_target_path = os.path.join(
+        tmp_result_path, f"Seednode_and_Targetnode_Round{round_num}.csv"
+    )
+    seed_target_df = generate_seednode_and_targetnode(
         molecular_network_df,
         seednode_df,
-        os.path.join(tmp_result_path, "Seednode_and_Targetnode.csv"),
+        seed_target_path,
     )
+
+    if round_num > 1:
+        last_seed_target_path = os.path.join(
+            tmp_result_path, f"Seednode_and_Targetnode_Round{round_num-1}.csv"
+        )
+        last_seed_target_df = pd.read_csv(last_seed_target_path)
+
+        filtered_seed_target_df = seed_target_df[
+            ~seed_target_df["Seednode"].isin(last_seed_target_df["Seednode"])
+        ]  # 滤除上一轮的种子节点
+        seed_target_df = filtered_seed_target_df
 
     # 计算tanimoto similarity
     seed_target_tanimoto_folder = (
-        tmp_result_path + "Seednode_and_Targetnode_Morgan_Similarity_score"
+        tmp_result_path
+        + f"Seednode_and_Targetnode_Morgan_Similarity_score_Round{round_num}"
     )
     os.makedirs(seed_target_tanimoto_folder, exist_ok=True)
     calculate_tanimoto_similarity(
         seednode_df,
-        edges_df,
+        seed_target_df,
         args.candidates_folder,
         os.path.join(
-            tmp_result_path, "Seednode_and_Targetnode_Morgan_Similarity_score"
+            tmp_result_path,
+            f"Seednode_and_Targetnode_Morgan_Similarity_score_Round{round_num}",
         ),
     )
 
-    # 检查种子节点
-    seed_target_df = pd.read_csv(
-        os.path.join(tmp_result_path, "Seednode_and_Targetnode.csv")
+    # 分组target node
+    output_unique = (
+        tmp_result_path
+        + f"Seednode_and_Targetnode_unique_seednode_Round{round_num}.csv"
     )
-    output_unique = tmp_result_path + "Seednode_and_Targetnode_unique_seednode.csv"
     output_repeated = (
-        tmp_result_path + "Seednode_and_Targetnode_not_unique_seednodes.csv"
+        tmp_result_path
+        + f"Seednode_and_Targetnode_not_unique_seednodes_Round{round_num}.csv"
     )
     group_target_nodes(seed_target_df, output_unique, output_repeated)
 
-    unique_csv = tmp_result_path + "Seednode_and_Targetnode_unique_seednode.csv"
+    unique_csv = (
+        tmp_result_path
+        + f"Seednode_and_Targetnode_unique_seednode_Round{round_num}.csv"
+    )
     not_unique_csv = (
-        tmp_result_path + "Seednode_and_Targetnode_not_unique_seednodes.csv"
+        tmp_result_path
+        + f"Seednode_and_Targetnode_not_unique_seednodes_Round{round_num}.csv"
     )
 
-    unique_folder = "tmp/Seednode_and_Targetnode_Morgan_Similarity_score_split_unique"
-    not_unique_folder = (
-        "tmp/Seednode_and_Targetnode_Morgan_Similarity_score_split_not_unique"
-    )
+    unique_folder = f"tmp/Seednode_and_Targetnode_Morgan_Similarity_score_split_unique_Round{round_num}"
+    not_unique_folder = f"tmp/Seednode_and_Targetnode_Morgan_Similarity_score_split_not_unique_Round{round_num}"
     os.makedirs(unique_folder, exist_ok=True)
     os.makedirs(not_unique_folder, exist_ok=True)
 
@@ -387,7 +402,12 @@ if __name__ == "__main__":
         not_unique_folder,
     )
 
-    pickle_topk_unique_seednode(unique_folder, args.top_k)
-    pickle_topk_not_unique(not_unique_csv, not_unique_folder, args.top_k)
+    unique_output_folder = f"tmp/Seednode_and_Targetnode_Morgan_Similarity_score_split_unique_Top{topk}_Round{round_num}"
+    not_unique_output_folder = f"tmp/Seednode_and_Targetnode_Morgan_Similarity_score_split_not_unique_Top{topk}_Round{round_num}"
+    os.makedirs(unique_output_folder, exist_ok=True)
+    os.makedirs(not_unique_output_folder, exist_ok=True)
 
-    print("Spend time: ", time.time() - start_time)
+    pickle_topk_unique_seednode(unique_folder, unique_output_folder, topk)
+    pickle_topk_not_unique(
+        not_unique_csv, not_unique_folder, not_unique_output_folder, topk
+    )

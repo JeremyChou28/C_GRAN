@@ -1,5 +1,4 @@
 import os
-import time
 import shutil
 import argparse
 import pandas as pd
@@ -39,7 +38,7 @@ def parse_args():
         help="the top k candidates for annotation",
     )
     parser.add_argument(
-        "--round",
+        "--round_num",
         type=int,
         default=0,
         help="the round of annotation, used to name the output file",
@@ -92,12 +91,11 @@ def pick_cycle_annotation(
             continue
         result_rows.append({"ID": file_id, "SMILES": smiles})
 
-
     # 将结果转换为DataFrame
     final_df = pd.DataFrame(result_rows)
 
     # 将df中的ID列的文件copy到naive_prediction_folder
-    for index in final_df['ID'].tolist():
+    for index in final_df["ID"].tolist():
         file_name = f"{index}.csv"
         src_path = os.path.join(unique_folder, file_name)
         if not os.path.exists(src_path):
@@ -112,19 +110,15 @@ if __name__ == "__main__":
     args = parse_args()
     seednode_file = args.seednode_file
     tanimoto_similarity_threshold = args.tanimoto_similarity_threshold
+    round_num = args.round_num
+    topk = args.top_k
 
-    # 读取 all_nodes 集合
     molecular_network_df = pd.read_csv(args.edited_molecular_network_file)
     source_nodes = molecular_network_df["source"].tolist()
     target_nodes = molecular_network_df["target"].tolist()
-    all_nodes = set(source_nodes + target_nodes)
 
-    unique_folder = (
-        f"tmp/Seednode_and_Targetnode_Morgan_Similarity_score_split_unique_Top{args.top_k}"
-    )
-    not_unique_folder = (
-        f"tmp/Seednode_and_Targetnode_Morgan_Similarity_score_split_not_unique_Top{args.top_k}"
-    )
+    unique_folder = f"tmp/Seednode_and_Targetnode_Morgan_Similarity_score_split_unique_Top{topk}_Round{round_num}"
+    not_unique_folder = f"tmp/Seednode_and_Targetnode_Morgan_Similarity_score_split_not_unique_Top{topk}_Round{round_num}"
     naive_prediction_folder = "tmp/naive_prediction_results"
     os.makedirs(naive_prediction_folder, exist_ok=True)
 
@@ -140,5 +134,4 @@ if __name__ == "__main__":
     seednode_df = pd.read_csv(seednode_file)
     seednode_df = seednode_df[["ID", "SMILES"]]
     merged_df = pd.concat([seednode_df, final_df], ignore_index=True)
-
-    merged_df.to_csv(f"tmp/naive_annotation_seednode_round{args.round}.csv", index=False)
+    merged_df.to_csv(f"tmp/naive_annotation_seednode_round{round_num}.csv", index=False)

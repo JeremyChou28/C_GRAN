@@ -1,5 +1,4 @@
 import os
-import time
 import argparse
 import pandas as pd
 from tqdm import tqdm
@@ -15,7 +14,7 @@ def parse_args():
         help="the original seednode file containing ID and SMILES",
     )
     parser.add_argument(
-        "--round",
+        "--round_num",
         type=int,
         default=0,
         help="the round of annotation, used to name the output file",
@@ -79,9 +78,7 @@ def pick_final_annotation(cfmid_prediction_folder, output_file):
         final_df.to_csv(output_file, index=False)
 
 
-def filter_annotation(
-    annotation_file, output_file
-):
+def filter_annotation(annotation_file, output_file):
     # 读取CSV文件
     df = pd.read_csv(annotation_file)
 
@@ -92,25 +89,35 @@ def filter_annotation(
         df.rename(columns={"MW": "MonoIsotopic Weight"}, inplace=True)
 
         # Step 2: 只保留指定列
-        columns_to_keep = ["ID", "Seed Node", "CID", "MonoIsotopic Weight", "SMILES", "Formula", "Score"]
+        columns_to_keep = [
+            "ID",
+            "Seed Node",
+            "CID",
+            "MonoIsotopic Weight",
+            "SMILES",
+            "Formula",
+            "Score",
+        ]
         df_final = df[columns_to_keep].copy()
         df_final["ID"] = df_final["ID"].astype(int)
         # 将CID列改成超链接
-        df_final["CID"] = "https://pubchem.ncbi.nlm.nih.gov/compound/" + df_final["CID"].astype(str)
-        
-        df_final['Seed Node'] = df_final['Seed Node'].apply(lambda x: '' if pd.isna(x) else str(int(x)))
+        df_final["CID"] = "https://pubchem.ncbi.nlm.nih.gov/compound/" + df_final[
+            "CID"
+        ].astype(str)
 
-        
+        df_final["Seed Node"] = df_final["Seed Node"].apply(
+            lambda x: "" if pd.isna(x) else str(int(x))
+        )
+
         pbar.update(1)
 
     # 保存结果
     df_final.sort_values(by="Score", inplace=True)
     df_final.to_csv(output_file, index=False)
+    return df_final
 
 
 if __name__ == "__main__":
-    start_time = time.time()
-
     args = parse_args()
 
     tmp_result_path = "tmp/"
@@ -122,13 +129,13 @@ if __name__ == "__main__":
     pick_final_annotation(cfmid_prediction_folder, annotation_result_file)
 
     output_file = tmp_result_path + "annotation_results_filtered.csv"
-    filter_annotation(
-        annotation_result_file, output_file
-    )
+    annotated_nodes_df_filtered = filter_annotation(annotation_result_file, output_file)
 
     # 生成下一轮的seednode file
-    annotated_nodes_df = pd.read_csv(output_file)
-    annotated_nodes_df = annotated_nodes_df[["ID", "SMILES"]]
+    annotated_nodes_df = annotated_nodes_df_filtered[["ID", "SMILES"]]
     seednode_df = pd.read_csv(args.seednode_file)[["ID", "SMILES"]]
     merged_df = pd.concat([seednode_df, annotated_nodes_df], ignore_index=True)
-    merged_df.to_csv(tmp_result_path + f"annotation_with_cfmid_seednode_round{args.round}.csv", index=False)
+    merged_df.to_csv(
+        tmp_result_path + f"annotation_with_cfmid_seednode_round{args.round_num}.csv",
+        index=False,
+    )
