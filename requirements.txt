@@ -9,3 +9,4 @@ scipy==1.10.1
 seaborn==0.12.2
 tqdm==4.67.1
 ipykernel==6.29.5
+openpyxl==3.1.5
