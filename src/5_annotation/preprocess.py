@@ -3,8 +3,11 @@ import shutil
 import argparse
 import pandas as pd
 from tqdm import tqdm
-from rdkit import Chem
+from rdkit import Chem, RDLogger
 from rdkit.Chem import rdMolDescriptors, DataStructs
+
+RDLogger.DisableLog("rdApp.warning")
+RDLogger.DisableLog("rdApp.error")
 
 
 def parse_args():
