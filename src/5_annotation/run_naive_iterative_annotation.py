@@ -123,6 +123,7 @@ if __name__ == "__main__":
 
     # 循环直到 seednode 中包含所有节点
     max_rounds = args.max_iterations  # 防止死循环，你也可以去掉
+    round_num = 0
 
     while round_num < max_rounds:
         round_time = time.time()
