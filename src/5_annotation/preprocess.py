@@ -78,9 +78,12 @@ def generate_seednode_and_targetnode(
                 {"Seednode": target, "Targetnode": source, "Correlation": corr}
             )
 
-    # 转换为 DataFrame 并按 Seednode 升序排序
-    result_df = pd.DataFrame(results)
-    result_df.sort_values(by="Seednode", inplace=True)
+    # 显式指定列名，避免空列表时无列导致的 KeyError
+    result_df = pd.DataFrame(results, columns=["Seednode", "Targetnode", "Correlation"])
+
+    # 仅在列存在且非空时排序
+    if not result_df.empty and "Seednode" in result_df.columns:
+        result_df.sort_values(by="Seednode", inplace=True)
 
     # 保存输出文件
     result_df.to_csv(output_filename, index=False)

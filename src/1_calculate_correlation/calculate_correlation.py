@@ -334,7 +334,7 @@ if __name__ == "__main__":
     args = parse_args()
 
     print(f"Loading data {args.intensity_file}...")
-    df = pd.read_csv(args.intensity_file, sep="\t")
+    df = pd.read_csv(args.intensity_file, sep="\t", index_col=0)
 
     assert (
         df.shape[0] == args.compounds_num and df.shape[1] == args.samples_num

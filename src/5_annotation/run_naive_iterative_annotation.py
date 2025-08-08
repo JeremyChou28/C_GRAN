@@ -102,7 +102,22 @@ def merge_naive_results(
         df_list.append(df)
 
     # Step 3: 合并所有 DataFrame
-    final_df = pd.concat(df_list, ignore_index=True)
+    if df_list:  # 如果 df_list 不为空
+        final_df = pd.concat(df_list, ignore_index=True)
+    else:
+        # 创建一个具有指定列名的空 DataFrame
+        columns = [
+            "Round",
+            "ID",
+            "Seed Node",
+            "CID",
+            "MonoIsotopic Weight",
+            "SMILES",
+            "Formula",
+            "Score",
+        ]
+        final_df = pd.DataFrame(columns=columns)
+
     final_df.to_csv(output_file, index=False)
     print(f"✅ All results merged into {output_file}")
 
