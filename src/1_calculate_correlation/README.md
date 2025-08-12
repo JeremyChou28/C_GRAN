@@ -5,7 +5,7 @@ you could run the example as follows:
 ```sh
 cd src/1_calculate_correlation
 
-python calculate_correlation.py --intensity_file test_files/test.txt --compounds_num 14 --samples_num 98 --correlation_result_filename correlation_results.csv
+python calculate_correlation.py --intensity_file test_files/test.txt --compounds_num 13 --samples_num 98 --correlation_result_filename correlation_results.csv
 ```
 
 - `intensity_file`: Path to the input data file. 

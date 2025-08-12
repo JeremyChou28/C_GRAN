@@ -83,6 +83,12 @@ def parse_args():
         required=True,
         help="the maximum number of iterations to run the annotation process",
     )
+    parser.add_argument(
+        "--tmp_name",
+        default="test",
+        type=str,
+        help="directory to save temporary files",
+    )
     return parser.parse_args()
 
 
@@ -147,7 +153,7 @@ if __name__ == "__main__":
     args = parse_args()
     # 初始的seednode file
     seednode_file = args.seednode_file
-    tmp_result_path = "tmp/"
+    tmp_result_path = f"tmp/{args.tmp_name}/"
 
     last_cycle_seednode_df = pd.read_csv(seednode_file)
     last_cycle_ids = set(last_cycle_seednode_df["ID"].astype(int).tolist())
@@ -181,6 +187,8 @@ if __name__ == "__main__":
                 str(args.top_k),
                 "--round_num",
                 str(round_num),
+                "--tmp_name",
+                args.tmp_name,
             ],
             check=True,
         )
@@ -204,6 +212,8 @@ if __name__ == "__main__":
                 str(args.modified_cosine_similarity_threshold),
                 "--round_num",
                 str(round_num),
+                "--tmp_name",
+                args.tmp_name,
             ],
             check=True,
         )
@@ -215,6 +225,8 @@ if __name__ == "__main__":
                 seednode_file,
                 "--round_num",
                 str(round_num),
+                "--tmp_name",
+                args.tmp_name,
             ],
             check=True,
         )

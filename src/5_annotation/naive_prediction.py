@@ -43,6 +43,12 @@ def parse_args():
         default=0,
         help="the round of annotation, used to name the output file",
     )
+    parser.add_argument(
+        "--tmp_name",
+        default="test",
+        type=str,
+        help="directory to save temporary files",
+    )
     return parser.parse_args()
 
 
@@ -113,7 +119,7 @@ if __name__ == "__main__":
     tanimoto_similarity_threshold = args.tanimoto_similarity_threshold
     round_num = args.round_num
     topk = args.top_k
-    tmp_result_path = "tmp/"
+    tmp_result_path = f"tmp/{args.tmp_name}/"
 
     molecular_network_df = pd.read_csv(args.edited_molecular_network_file)
     source_nodes = molecular_network_df["source"].tolist()

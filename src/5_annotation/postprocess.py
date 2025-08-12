@@ -19,6 +19,12 @@ def parse_args():
         default=0,
         help="the round of annotation, used to name the output file",
     )
+    parser.add_argument(
+        "--tmp_name",
+        default="test",
+        type=str,
+        help="directory to save temporary files",
+    )
     return parser.parse_args()
 
 
@@ -120,7 +126,7 @@ def filter_annotation(df, output_file):
 if __name__ == "__main__":
     args = parse_args()
 
-    tmp_result_path = "tmp/"
+    tmp_result_path = f"tmp/{args.tmp_name}/"
     if not os.path.exists(tmp_result_path):
         os.makedirs(tmp_result_path)
 

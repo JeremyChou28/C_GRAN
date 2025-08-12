@@ -36,6 +36,19 @@ def parse_args():
         required=True,
         help="input correlation file",
     )
+    parser.add_argument(
+        "--edited_molecular_network_file",
+        default="source_target_cor_edit.csv",
+        type=str,
+        required=True,
+        help="input edited molecular network file",
+    )
+    parser.add_argument(
+        "--tmp_name",
+        default="test",
+        type=str,
+        help="directory to save temporary files",
+    )
     return parser.parse_args()
 
 
@@ -103,7 +116,7 @@ if __name__ == "__main__":
     start_time = time.time()
     args = parse_args()
 
-    tmp_result_path = "tmp/"
+    tmp_result_path = f"tmp/{args.tmp_name}/"
     if not os.path.exists(tmp_result_path):
         os.makedirs(tmp_result_path)
 
@@ -120,7 +133,7 @@ if __name__ == "__main__":
     )
 
     # 编辑分子网络
-    output_filename = tmp_result_path + "source_target_cor_edit.csv"
+    output_filename = args.edited_molecular_network_file
     edit_molecular_network(
         source_target_cor_df,
         output_filename,

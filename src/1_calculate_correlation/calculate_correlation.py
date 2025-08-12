@@ -42,6 +42,12 @@ def parse_args():
         type=int,
         help="number of jobs",
     )
+    parser.add_argument(
+        "--tmp_name",
+        default="test",
+        type=str,
+        help="directory to save temporary files",
+    )
     return parser.parse_args()
 
 
@@ -336,7 +342,7 @@ if __name__ == "__main__":
 
     print(f"Data loaded. shape: {df.shape}")
 
-    tmp_result_path = "tmp/"
+    tmp_result_path = f"tmp/{args.tmp_name}/"
     if not os.path.exists(tmp_result_path):
         os.makedirs(tmp_result_path)
 

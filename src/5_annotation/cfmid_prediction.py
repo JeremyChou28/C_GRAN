@@ -71,6 +71,12 @@ def parse_args():
         default=0,
         help="the round of annotation, used to name the output file",
     )
+    parser.add_argument(
+        "--tmp_name",
+        default="test",
+        type=str,
+        help="directory to save temporary files",
+    )
     return parser.parse_args()
 
 
@@ -310,7 +316,7 @@ def process_file(
 
 if __name__ == "__main__":
     args = parse_args()
-    tmp_result_path = "tmp/"
+    tmp_result_path = f"tmp/{args.tmp_name}/"
 
     # 读取not_unique和unique文件夹下的文件
     not_unique_files = os.listdir(
