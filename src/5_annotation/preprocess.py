@@ -395,8 +395,14 @@ if __name__ == "__main__":
         + f"Seednode_and_Targetnode_not_unique_seednodes_Round{round_num}.csv"
     )
 
-    unique_folder = f"tmp/Seednode_and_Targetnode_Morgan_Similarity_score_split_unique_Round{round_num}"
-    not_unique_folder = f"tmp/Seednode_and_Targetnode_Morgan_Similarity_score_split_not_unique_Round{round_num}"
+    unique_folder = (
+        tmp_result_path
+        + f"Seednode_and_Targetnode_Morgan_Similarity_score_split_unique_Round{round_num}"
+    )
+    not_unique_folder = (
+        tmp_result_path
+        + f"Seednode_and_Targetnode_Morgan_Similarity_score_split_not_unique_Round{round_num}"
+    )
     os.makedirs(unique_folder, exist_ok=True)
     os.makedirs(not_unique_folder, exist_ok=True)
 
@@ -408,8 +414,14 @@ if __name__ == "__main__":
         not_unique_folder,
     )
 
-    unique_output_folder = f"tmp/Seednode_and_Targetnode_Morgan_Similarity_score_split_unique_Top{topk}_Round{round_num}"
-    not_unique_output_folder = f"tmp/Seednode_and_Targetnode_Morgan_Similarity_score_split_not_unique_Top{topk}_Round{round_num}"
+    unique_output_folder = (
+        tmp_result_path
+        + f"Seednode_and_Targetnode_Morgan_Similarity_score_split_unique_Top{topk}_Round{round_num}"
+    )
+    not_unique_output_folder = (
+        tmp_result_path
+        + f"Seednode_and_Targetnode_Morgan_Similarity_score_split_not_unique_Top{topk}_Round{round_num}"
+    )
     os.makedirs(unique_output_folder, exist_ok=True)
     os.makedirs(not_unique_output_folder, exist_ok=True)
 

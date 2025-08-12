@@ -113,14 +113,21 @@ if __name__ == "__main__":
     tanimoto_similarity_threshold = args.tanimoto_similarity_threshold
     round_num = args.round_num
     topk = args.top_k
+    tmp_result_path = "tmp/"
 
     molecular_network_df = pd.read_csv(args.edited_molecular_network_file)
     source_nodes = molecular_network_df["source"].tolist()
     target_nodes = molecular_network_df["target"].tolist()
 
-    unique_folder = f"tmp/Seednode_and_Targetnode_Morgan_Similarity_score_split_unique_Top{topk}_Round{round_num}"
-    not_unique_folder = f"tmp/Seednode_and_Targetnode_Morgan_Similarity_score_split_not_unique_Top{topk}_Round{round_num}"
-    naive_prediction_folder = "tmp/naive_prediction_results"
+    unique_folder = (
+        tmp_result_path
+        + f"Seednode_and_Targetnode_Morgan_Similarity_score_split_unique_Top{topk}_Round{round_num}"
+    )
+    not_unique_folder = (
+        tmp_result_path
+        + f"Seednode_and_Targetnode_Morgan_Similarity_score_split_not_unique_Top{topk}_Round{round_num}"
+    )
+    naive_prediction_folder = tmp_result_path + "naive_prediction_results"
     os.makedirs(naive_prediction_folder, exist_ok=True)
 
     # 运行 naive prediction
@@ -135,4 +142,6 @@ if __name__ == "__main__":
     seednode_df = pd.read_csv(seednode_file)
     seednode_df = seednode_df[["ID", "SMILES"]]
     merged_df = pd.concat([seednode_df, final_df], ignore_index=True)
-    merged_df.to_csv(f"tmp/naive_annotation_seednode_round{round_num}.csv", index=False)
+    merged_df.to_csv(
+        tmp_result_path + f"naive_annotation_seednode_round{round_num}.csv", index=False
+    )

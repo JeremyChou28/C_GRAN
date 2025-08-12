@@ -147,6 +147,7 @@ if __name__ == "__main__":
     args = parse_args()
     # 初始的seednode file
     seednode_file = args.seednode_file
+    tmp_result_path = "tmp/"
 
     last_cycle_seednode_df = pd.read_csv(seednode_file)
     last_cycle_ids = set(last_cycle_seednode_df["ID"].astype(int).tolist())
@@ -218,7 +219,9 @@ if __name__ == "__main__":
             check=True,
         )
 
-        seednode_file = f"tmp/annotation_with_cfmid_seednode_round{round_num}.csv"
+        seednode_file = (
+            tmp_result_path + f"annotation_with_cfmid_seednode_round{round_num}.csv"
+        )
         # 读取 seednode 文件，检查 ID 集合
         try:
             seednode_df = pd.read_csv(seednode_file)
@@ -240,9 +243,9 @@ if __name__ == "__main__":
 
     # 输出最终的注释结果
     merge_cfmid_results(
-        cfmid_score_results_path="tmp/cfmid_score_results/",
+        cfmid_score_results_path=tmp_result_path + "cfmid_score_results/",
         output_file="final_cfmid_annotation_results.csv",
-        cfmid_seednodes_path=f"tmp/",
+        cfmid_seednodes_path=tmp_result_path,
         iterations=round_num,
     )
     print("Spend time: ", time.time() - start_time)

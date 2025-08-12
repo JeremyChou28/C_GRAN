@@ -265,19 +265,23 @@ def process_file(
     modified_cosine_similarity_threshold,
     topk,
     round_num,
+    result_path,
 ):
     prefix = "not_unique" if file_type == "not_unique" else "unique"
-    folder = f"tmp/Seednode_and_Targetnode_Morgan_Similarity_score_split_{prefix}_Top{topk}_Round{round_num}/"
+    folder = (
+        result_path
+        + f"Seednode_and_Targetnode_Morgan_Similarity_score_split_{prefix}_Top{topk}_Round{round_num}/"
+    )
 
     df = pd.read_csv(os.path.join(folder, file))
     smiles = df["SMILES"].values.tolist()
     target_node_id = file.split(".csv")[0]
-    os.makedirs(f"tmp/cfmid_spectrum_results/{target_node_id}", exist_ok=True)
+    os.makedirs(result_path + f"cfmid_spectrum_results/{target_node_id}", exist_ok=True)
 
     # 准备任务
     tasks = []
     for i, smile in enumerate(smiles):
-        output_file = f"tmp/cfmid_spectrum_results/{target_node_id}/{i}.txt"
+        output_file = result_path + f"cfmid_spectrum_results/{target_node_id}/{i}.txt"
         container_idx = i % NUM_CONTAINERS  # 简单轮询分配容器
         tasks.append(
             (
@@ -300,21 +304,24 @@ def process_file(
     for idx, score in results:
         df.at[idx, "CFM-ID_score"] = score
 
-    output_csv = f"tmp/cfmid_score_results/{target_node_id}.csv"
+    output_csv = result_path + f"cfmid_score_results/{target_node_id}.csv"
     df.to_csv(output_csv, index=False)
 
 
 if __name__ == "__main__":
     args = parse_args()
+    tmp_result_path = "tmp/"
 
     # 读取not_unique和unique文件夹下的文件
     not_unique_files = os.listdir(
-        f"tmp/Seednode_and_Targetnode_Morgan_Similarity_score_split_not_unique_Top{args.top_k}_Round{args.round_num}/"
+        tmp_result_path
+        + f"Seednode_and_Targetnode_Morgan_Similarity_score_split_not_unique_Top{args.top_k}_Round{args.round_num}/"
     )
     unique_files = os.listdir(
-        f"tmp/Seednode_and_Targetnode_Morgan_Similarity_score_split_unique_Top{args.top_k}_Round{args.round_num}/"
+        tmp_result_path
+        + f"Seednode_and_Targetnode_Morgan_Similarity_score_split_unique_Top{args.top_k}_Round{args.round_num}/"
     )
-    os.makedirs("tmp/cfmid_score_results", exist_ok=True)
+    os.makedirs(tmp_result_path + "cfmid_score_results", exist_ok=True)
 
     # 读取目标节点的mgf文件并解析
     all_target_spectra = parse_groundtruth_spectrum(args.spectrum_file)
@@ -342,6 +349,7 @@ if __name__ == "__main__":
                 args.modified_cosine_similarity_threshold,
                 args.top_k,
                 args.round_num,
+                tmp_result_path,
             )
 
     for file in tqdm(unique_files, desc="Processing unique files"):
@@ -355,6 +363,7 @@ if __name__ == "__main__":
                 args.modified_cosine_similarity_threshold,
                 args.top_k,
                 args.round_num,
+                tmp_result_path,
             )
 
     for c in controllers:

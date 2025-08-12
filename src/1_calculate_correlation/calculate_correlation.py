@@ -42,12 +42,6 @@ def parse_args():
         type=int,
         help="number of jobs",
     )
-    parser.add_argument(
-        "--run_name",
-        default="test",
-        type=str,
-        help="run name for output pickle filename",
-    )
     return parser.parse_args()
 
 
@@ -350,38 +344,29 @@ if __name__ == "__main__":
     filter_df = df.copy()
     filtered_expt_df = filter_out_exceptions(filter_df)
     filter_expt_correlations = calculate_correlations(filtered_expt_df, args.n_jobs)
-    filtered_csv_filename = (
-        tmp_result_path + f"corr_pval_with_n_{args.run_name}_filtered.csv"
-    )
+    filtered_csv_filename = tmp_result_path + f"corr_pval_with_n_filtered.csv"
     filtered_csv_df = save_to_csv(filter_expt_correlations, filtered_csv_filename)
 
     # 保留异常值
     unfilter_df = df.copy()
     unfiltered_correlations = calculate_correlations(unfilter_df, args.n_jobs)
-    unfiltered_csv_filename = (
-        tmp_result_path + f"corr_pval_with_n_{args.run_name}_unfiltered.csv"
-    )
+    unfiltered_csv_filename = tmp_result_path + f"corr_pval_with_n_unfiltered.csv"
     unfiltered_csv_df = save_to_csv(unfiltered_correlations, unfiltered_csv_filename)
 
     # 比较过滤和未过滤的结果
-    compare_results_filename = (
-        tmp_result_path + f"Sediment_pos_3SD_20240812_different_correlations_with_n.csv"
-    )
+    compare_results_filename = tmp_result_path + f"different_correlations_with_n.csv"
     different_correlations_df = compare_filtered_unfiltered(
         filtered_csv_df, unfiltered_csv_df, compare_results_filename
     )
 
     # 进行Fisher's z变换和Z检验
     fish_z_results_filename = (
-        tmp_result_path
-        + f"significant_Sediment_pos_3SD_20240828_different_correlations_with_n_true.csv"
+        tmp_result_path + f"significant_different_correlations_with_n_true.csv"
     )
     significant_rows = exec_fish_z(different_correlations_df, fish_z_results_filename)
 
     # 替换为较小的相关系数和对应的P值
-    replace_with_miniCor_filename = (
-        tmp_result_path + f"corr_pval_final_CD_sediment_pos_3SD_20240828_miniCor.csv"
-    )
+    replace_with_miniCor_filename = tmp_result_path + f"corr_pval_final_miniCor.csv"
     replace_with_miniCor_df = replace_with_miniCor(
         unfiltered_csv_df, significant_rows, replace_with_miniCor_filename
     )

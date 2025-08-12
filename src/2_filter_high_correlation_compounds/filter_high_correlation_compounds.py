@@ -86,8 +86,7 @@ if __name__ == "__main__":
 
     # 过滤高相关性化合物
     filter_filename = (
-        tmp_result_path
-        + "corr_pval_final_CD_sediment_pos_3SD_20240828_miniCor_p0.05_connectwith_seednode.csv"
+        tmp_result_path + "corr_pval_final_miniCor_p0.05_connectwith_seednode.csv"
     )
     filtered_df = filter_according_to_substance(
         correlation_df, seednode_df, filter_filename
