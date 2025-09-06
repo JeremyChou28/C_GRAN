@@ -1,6 +1,11 @@
+src/1_calculate_correlation/calculate_correlation_modified.py
+src/1_calculate_correlation/test_files/MSV000091789_log.txt
+src/1_calculate_correlation/test_files/read.ipynb
 src/1_calculate_correlation/correlation_results.csv
 src/1_calculate_correlation/test_files/CD_sediment_pos.txt
+src/2_filter_high_correlation_compounds/test_files/seednode_plastic_MSV000091789_pos.csv
 src/3_construct_molecular_network/source_target_cor_edit.csv
+src/3_construct_molecular_network/test_files/edges.csv
 src/5_annotation/final_naive_annotation_results.csv
 src/5_annotation/final_cfmid_annotation_results.csv
 src/5_annotation/final_naive_annotation_results_with_structures.csv
@@ -11,4 +16,5 @@ pubchem_database.pk
 archive/
 cfmid_mol_imgs/
 naive_mol_imgs/
+
 

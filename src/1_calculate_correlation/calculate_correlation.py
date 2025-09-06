@@ -5,10 +5,10 @@ import argparse
 import numpy as np
 import pandas as pd
 from tqdm import tqdm
-from scipy.stats import norm
 import multiprocessing
 from functools import partial
-from scipy.stats import pearsonr
+from scipy import stats
+from scipy.stats import pearsonr, norm
 from multiprocessing import shared_memory, Process, Pool
 import warnings
 

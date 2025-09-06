@@ -202,7 +202,7 @@ This project is licensed under the [MIT License](LICENSE).
 
 ## 👥 Contact <a name="contact"></a>
 
-- Shuping Zheng: 
+- Shuping Zheng: spzheng0908@sjtu.edu.cn
 - Jianping Zhou: jianpingzhou0927@gmail.com
 
 
