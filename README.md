@@ -17,7 +17,7 @@
 <!-- - [🙏 Acknowledgements](#acknowledgements) -->
 
 ## 📖 About the Project <a name="about-project"></a>
-C-GRAN (Community-Guided Recursive Annotation Network) is an open, network-based framework for the systematic discovery and annotation of emerging structural analogs in complex environmental samples. Designed for non-target screening (NTS) using tandem mass spectrometry (MS/MS), C-GRAN integrates molecular networking with sample-wise co-occurrence analysis to uncover structurally or functionally related compounds beyond spectral similarity constraints. Starting from high-confidence seed annotations, candidate compounds are expanded through a recursive database search strategy, incorporating exact-mass-based matching. Each candidate is ranked based on structural similarity to known analogs, fragment match quality, and occurrence correlation. By iteratively propagating annotations across molecular networks, C-GRAN enables high-coverage identification of structurally diverse compounds—especially those missed by traditional spectral-based tools. 
+C-GRAN (Community-Guided Recursive Annotation Network) is an open, network-based framework for the systematic discovery and annotation of emerging structural analogs in complex environmental samples. Designed for non-target screening (NTS) using tandem mass spectrometry (MS/MS), C-GRAN integrates molecular networking with sample-wise co-occurrence analysis to uncover structurally or functionally related compounds beyond spectral similarity constraints. Starting from high-confidence seed annotations, candidate compounds are expanded through a recursive database search strategy, incorporating exact-mass-based matching. Each candidate is ranked based on structural similarity to known analogs, fragment match quality, and occurrence correlation. By iteratively propagating annotations across molecular networks, C-GRAN enables high-coverage identification of structurally diverse compounds—especially those missed by traditional spectral-based tools. You can access our [online platform](https://cgran.acemap.info/#/).
 
 ## 💻 Getting Started <a name="getting-started"></a>
 
@@ -213,12 +213,4 @@ This project is licensed under the [MIT License](LICENSE).
 
 If you find this repo useful, please cite our paper. Thanks for your attention.
 
-<!-- ```
-@inproceedings{zhou2024mtsci,
-  title={MTSCI: A Conditional Diffusion Model for Multivariate Time Series Consistent Imputation},
-  author={Zhou, Jianping and Li, Junhao and Zheng, Guanjie and Wang, Xinbing and Zhou, Chenghu},
-  booktitle={Proceedings of the 33rd ACM International Conference on Information and Knowledge Management},
-  pages={3474--3483},
-  year={2024}
-}
-``` -->
+
