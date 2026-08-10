@@ -4,8 +4,8 @@ from tqdm import tqdm
 
 # === 参数设置 ===
 file_A = "input/unique_ID_MW_Ocean_OPEs_cor0.00001_adjusted_pvalue_cor_decoy.csv"  # 包含 ID 和 MW 的文件
-file_B = "output/filtered_merge_all_edit_filtered.csv"  # 包含 monoisotopicmass 的主文件
-output_folder = "output/candidates_Ocean_OPEs_cor0.00001_adjusted_pvalue_cor_decoy_5ppm"
+file_B = "input/filtered_merge_all_edit_filtered.csv"  # 包含 monoisotopicmass 的主文件
+output_folder = "output/test"
 os.makedirs(output_folder, exist_ok=True)
 
 # === 读取数据 ===
