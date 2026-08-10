@@ -34,9 +34,19 @@ pip install -r requirements.txt
 #### Step 1. Calculate correlation
 
 ```sh
-cd src/1_calculate_correlation
+cd src/1_calculate_correlation/src_version_2/src_final_file_only_lowmem_bh
 
-python calculate_correlation.py --intensity_file test_files/test.txt --compounds_num 13 --samples_num 98 --correlation_result_filename correlation_results.csv
+python entry.py \
+  --intensity_file test_files/test.txt \
+  --compounds_num 13 \
+  --samples_num 98 \
+  --correlation_result_filename correlation_results.csv\
+  --n_jobs 32 \
+  --tmp_name test \
+  --block_size 512 \
+  --pair_chunk_size 1000000 \
+  --bh_chunk_size 10000000 \
+  --final_only
 ```
 
 - `intensity_file`: Path to the input data file. 
